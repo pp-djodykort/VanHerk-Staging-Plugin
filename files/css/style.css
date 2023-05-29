@@ -1,0 +1,123 @@
+/* ===== Declaring Variables ===== */
+:root {
+    /* Img header vars */
+    --headerImgHeight: 75px;
+    --imgLastSyncBigHeight: 37px;
+}
+
+/* ===== Start of CSS ===== */
+/* Global Styling*/
+.float-left {
+    float: left;
+}
+.float-right {
+    float: right;
+}
+/* End Global Styling*/
+
+/* Styling Template Header */
+header {
+    /* Positioning */
+    padding: 50px 0 20px 0;
+}
+header img{
+    /* Styling */
+    height: var(--headerImgHeight);
+    /* Positioning */
+    padding-right: 20px;
+    float: left;
+}
+.div-Header {
+    display: table;
+    width: 79vw;
+    height: var(--headerImgHeight);
+}
+.floatLeft {
+    /* Positioning */
+    vertical-align: middle;
+    text-align: left;
+    /* Styling */
+    display: table-cell;
+}
+.floatRight {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: right;
+}
+header:after {
+    content: "";
+    /* Positioning */
+    display: table;
+    clear: both;
+}
+/* End Styling Template Header */
+
+
+/* Styling OG Dashboard */
+/* Styling the button to kinda looks like a wordpress button*/
+.divAllAanbod button {
+    /* Styling */
+    color: #fff;
+    cursor: pointer;
+    /* Positioning */
+    margin: 0 0 0 10px;
+    padding: 5px 10px;
+    /* Sizing */
+    border-radius: 3px;
+    border-width: 1px;
+    border-style: solid;
+    width: 55% !important;
+    /* Fonting */
+    text-decoration: none;
+    text-shadow: none;
+    box-shadow: none;
+    font-size: 20px;
+    outline: none;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -webkit-appearance: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.divSmallAanbod button {
+    /* Styling */
+    color: black;
+    background-color: white;
+    cursor: pointer;
+    /* Positioning */
+    padding: 5px 10px;
+    /* Sizing */
+    border-radius: 3px;
+    border-width: 1px;
+    border-style: solid;
+    width: 37.5% !important;
+    /* Fonting */
+    text-decoration: none;
+    text-shadow: none;
+    box-shadow: none;
+    font-size: 20px;
+    outline: none;
+    white-space: nowrap;
+    vertical-align: middle;
+    -webkit-appearance: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.divSmallAanbod img {
+    float: left;
+}
+.divSmallAanbod span {
+    text-align: center;
+}
+.divSmallAanbod div span {
+    font-size: 15px;
+}
+/* Doing the same div picture in button thing as I did in the header */
+
+
+/* End Styling OG Dashboard */
