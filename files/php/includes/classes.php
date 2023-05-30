@@ -1,5 +1,8 @@
 <?php
 // ================== Imports ==================
+
+use function PHPSTORM_META\type;
+
 include_once("functions.php");
 
 // ==== Activation and Deactivation (Uninstallation is in the functions.php because it needs to be a static function) ====
@@ -273,11 +276,43 @@ class OGMapping {
     // ================ Begin of Class ================
     function mapMetaData($postTypeName, $object, $databaseKeys) {
         // ======== Declaring Variables ========
+        # Classes
+        global $wpdb;
 
 
+        
+        # Vars
+	    $OGTableRecord = $object;
+        $mappingTable = $wpdb->get_results("SELECT * FROM `og_mapping".$postTypeName."`", ARRAY_A);
         // ======== Start of Function ========
+        # Getting rid of all the useless and empty values
+        foreach ($OGTableRecord as $OGTableRecordKey => $OGTableRecordValue) {
+            # Check if the value is empty and if so remove the whole key from the OBJECT
+            if (is_null($OGTableRecordValue) or empty($OGTableRecordValue)) {
+                unset($OGTableRecord->{$OGTableRecordKey});
+            }
+        }
 
-        return [];
+        # Looping through again to map the values now that the empty values are gone
+        foreach ($OGTableRecord as $OGTableRecordKey => $OGTableRecordValue) {
+            # Looping through the mapping table
+            foreach ($mappingTable as $mappingTableValue) {
+	            # Looking if there is a direct match
+                if ($OGTableRecordKey == $mappingTableValue['pixelplus']) {
+                    # Changing the old key to the new key
+                    $OGTableRecord->{$mappingTableValue['vanherk']} = $OGTableRecordValue;
+                    # Removing the old key
+                    unset($OGTableRecord->{$OGTableRecordKey});
+                }
+
+                #
+            }
+        }
+
+        echo('<pre>'); print_r($OGTableRecord); echo('</pre>');
+
+        # Return the object
+        return $object;
     }
 }
 
@@ -463,16 +498,11 @@ class OGPostTypes {
 class OGOffers {
 	// ==== Start of Class ====
 	function __construct() {
+        # Use this one if it is going to be run on the site itself.
+        add_action('admin_init', array($this, 'examinePosts'));
 
-    // Check if it is in wordpress itself or just another script
-		if (is_admin()) {
-            print('test');
-			add_action('admin_init', array($this, 'examinePosts'));
-        }
-        else {
-            print('test2');
-	        $this->examinePosts();
-        }
+        # Use this one if it is going to be a cronjob.
+//        $this->examinePosts();
 	}
 
 	// ================ Functions ================
@@ -506,21 +536,21 @@ class OGOffers {
 			'post_status' => 'draft'
 		];
 		$post_data = $this->getNames($post_data, $object, $databaseKeys);
-		$ogMappedMetaData = $ogMapping->mapMetaData($postTypeName, $object, $databaseKeys);
+		$object = $ogMapping->mapMetaData($postTypeName, $object, $databaseKeys);
 
 		// ======== Start of Function ========
-		# Creating the post
-		$postID = wp_insert_post($post_data);
-
-		# Adding the post meta
-		foreach ($object as $key => $value) {
-			add_post_meta($postID, $key, $value);
-		}
-
-		# Adding meta data for images
-
-		# Publishing the post
-		wp_publish_post($postID);
+//		# Creating the post
+//		$postID = wp_insert_post($post_data);
+//
+//		# Adding the post meta
+//		foreach ($object as $key => $value) {
+//			add_post_meta($postID, $key, $value);
+//		}
+//
+//		# Adding meta data for images
+//
+//		# Publishing the post
+//		wp_publish_post($postID);
 	}
 
 	function updatePost($postID, $object, $databaseKeys) {
@@ -538,13 +568,13 @@ class OGOffers {
 		$post_data = $this->getNames($post_data, $object, $databaseKeys);
 
 		// ======== Start of Function ========
-		# Overwriting the post
-		wp_update_post($post_data);
-
-		# Updating the post meta
-		foreach ($object as $key => $value) {
-			update_post_meta($postID, $key, $value);
-		}
+//		# Overwriting the post
+//		wp_update_post($post_data);
+//
+//		# Updating the post meta
+//		foreach ($object as $key => $value) {
+//			update_post_meta($postID, $key, $value);
+//		}
 	}
 
 	function checkPosts($objects, $databaseKeys, $postTypeName) {
@@ -629,6 +659,5 @@ class OGOffers {
 			'datetime' => date('Y-m-d H:i:s', $beginTime),
 			'duration' => round((time() - $beginTime) / 60, 2)
 		]);
-		print_r('dikk sucker');
 	}
 }
