@@ -1,5 +1,10 @@
 <?php
 // ==================================== Imports ====================================
+# Limits
+// Changing the exectuion time and memory limit
+ini_set('max_execution_time', '500');
+ini_set('memory_limit', '-1');
+
 # Wordpress
 require_once(dirname(__DIR__, 6).'/wp-load.php');
 

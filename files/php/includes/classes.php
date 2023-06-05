@@ -1,8 +1,5 @@
 <?php
 // ================== Imports ==================
-
-use function PHPSTORM_META\type;
-
 include_once("functions.php");
 
 // ==== Activation and Deactivation (Uninstallation is in the functions.php because it needs to be a static function) ====
@@ -113,10 +110,14 @@ class OGPostTypeData {
                 ),
                 'database_tables' => array(
                     'tbl_og_wonen2' => array(
-                        'ID' => 'object_ObjectCode',
+                        'ID' => 'id',
                         'post_title' => 'objectDetails_Adres_NL_Straatnaam;objectDetails_Adres_NL_Huisnummer;objectDetails_Adres_NL_Woonplaats',
                         'post_content' => 'objectDetails_Aanbiedingstekst',
-                        'datum_gewijzigd' => 'datum_gewijzigd',
+                        'datum_gewijzigd_database' => 'datum_gewijzigd',
+                        'datum_gewijzigd_post' => 'ObjectUpdated',
+                    ),
+                    'tbl_OG_media' => array(
+	                    'search_id' => 'id_OG_wonen'
                     )
                 )
             ),
@@ -149,10 +150,14 @@ class OGPostTypeData {
                 ),
                 'database_tables' => array(
                     'ppog_databog2' => array(
-                        'ID' => 'object_ObjectCode',
+                        'ID' => 'id',
                         'post_title' => 'objectDetails_Adres_Straatnaam;objectDetails_Adres_Huisnummer;objectDetails_Adres_Woonplaats',
                         'post_content' => 'objectDetails_Aanbiedingstekst',
-                        'datum_gewijzigd' => 'datum_gewijzigd',
+                        'datum_gewijzigd_database' => 'datum_gewijzigd',
+                        'datum_gewijzigd_post' => 'ObjectUpdated',
+                    ),
+                    'tbl_OG_media' => array(
+                        'search_id' => 'id_OG_bog'
                     )
                 )
             ),
@@ -274,45 +279,110 @@ class OGMapping {
     }
 
     // ================ Begin of Class ================
-    function mapMetaData($postTypeName, $object, $databaseKeys) {
+    function mapMetaData($postTypeName, $object) {
         // ======== Declaring Variables ========
         # Classes
         global $wpdb;
 
-
-        
         # Vars
 	    $OGTableRecord = $object;
         $mappingTable = $wpdb->get_results("SELECT * FROM `og_mapping".$postTypeName."`", ARRAY_A);
-        // ======== Start of Function ========
-        # Getting rid of all the useless and empty values
+
+        // ========================= Start of Function =========================
+        // ================ Cleaning the Tables/Records ================
+        # Getting rid of all the useless and empty values in the OBJECT
         foreach ($OGTableRecord as $OGTableRecordKey => $OGTableRecordValue) {
             # Check if the value is empty and if so remove the whole key from the OBJECT
             if (is_null($OGTableRecordValue) or empty($OGTableRecordValue)) {
                 unset($OGTableRecord->{$OGTableRecordKey});
             }
         }
-
-        # Looping through again to map the values now that the empty values are gone
-        foreach ($OGTableRecord as $OGTableRecordKey => $OGTableRecordValue) {
-            # Looping through the mapping table
-            foreach ($mappingTable as $mappingTableValue) {
-	            # Looking if there is a direct match
-                if ($OGTableRecordKey == $mappingTableValue['pixelplus']) {
-                    # Changing the old key to the new key
-                    $OGTableRecord->{$mappingTableValue['vanherk']} = $OGTableRecordValue;
-                    # Removing the old key
-                    unset($OGTableRecord->{$OGTableRecordKey});
-                }
-
-                #
+        # Getting rid of all the useless and empty values in the MAPPING TABLE
+        foreach ($mappingTable as $mappingKey => $mappingTableValue) {
+            # Check if the value is empty and if so remove the whole key from the OBJECT
+            if (is_null($mappingTableValue['pixelplus']) or empty($mappingTableValue['pixelplus'])) {
+                unset($mappingTable[$mappingKey]);
             }
         }
 
-        echo('<pre>'); print_r($OGTableRecord); echo('</pre>');
+        // ================ Mapping the Data ================
+        foreach ($mappingTable as $mappingKey => $mappingValue) {
+	        // ==== Checking conditional ====
+	        if (str_starts_with($mappingValue['pixelplus'], '(') and str_ends_with($mappingValue['pixelplus'], ')')) {
+		        // ==== Declaring Variables ====
+		        $strTrimmedKey = trim($mappingValue['pixelplus'], '()');
+		        $arrExplodedKey = explode('|', $strTrimmedKey);
+                $boolResult = false;
 
+		        // ==== Start of Function ====
+                # Step 1: Looping through all the keys
+                foreach ($arrExplodedKey as $arrExplodedKeyValue) {
+                    # Step 2: Check if the key even isset or empty in OG Record
+                    if (isset($OGTableRecord->{$arrExplodedKeyValue}) and !empty($OGTableRecord->{$arrExplodedKeyValue})) {
+                        # Step 3: Change the mapping table's value to just one key instead of making the the key an array/conditional
+                        $mappingTable[$mappingKey]['pixelplus'] = $arrExplodedKeyValue;
+                        $boolResult = true;
+                    }
+                }
+                # Step 4: Check if the result is false and if so unset the whole key from the mapping table
+                if (!$boolResult) {
+                    unset($mappingTable[$mappingKey]);
+                }
+            }
+            // ==== Checking concatinations ====
+            if (str_starts_with($mappingValue['pixelplus'], '{') and str_ends_with($mappingValue['pixelplus'], '}')) {
+                // ==== Declaring Variables ====
+                # Vars
+                $strTrimmedKey = trim($mappingValue['pixelplus'], '{}');
+                $arrExplodedKey = explode('+', $strTrimmedKey);
+                $strResult = '';
+
+                // ==== Start of Function ====
+	            # Step 1: Looping through all the keys
+                foreach($arrExplodedKey as $arrExplodedKeyValue) {
+	                # Step 2: Check if the key even isset or empty in OG Record
+                    if (isset($OGTableRecord->{$arrExplodedKeyValue}) and !empty($OGTableRecord->{$arrExplodedKeyValue})) {
+                        # Step 3: Add the value to the result string
+                        $strResult .= $OGTableRecord->{$arrExplodedKeyValue}.' ';
+                    }
+                }
+                # Step 5: Putting it in the mapping table as a default value
+                $mappingTable[$mappingKey]['pixelplus'] = "'".rtrim($strResult)."'";
+            }
+        }
+        # Looping through the mapping table with the updated values
+	    foreach ($mappingTable as $mappingKey => $mappingValue) {
+		    // ======== Checking default values ========
+            if (str_starts_with($mappingValue['pixelplus'], "'") and str_ends_with($mappingValue['pixelplus'], "'")) {
+	            // ==== Declaring Variables ====
+	            # Vars
+                $strTrimmedKey = trim($mappingValue['pixelplus'], "'");
+
+                // ==== Start of Function ====
+                # Step 1: Making a new key with the value of the old key
+                $OGTableRecord->{$mappingValue['vanherk']} = $strTrimmedKey;
+                # Step 2: Removing the old key
+                unset($OGTableRecord->{$mappingValue['pixelplus']});
+            }
+	    }
+
+        # Direct matches
+	    foreach ($OGTableRecord as $OGTableRecordKey => $OGTableRecordValue) {
+		    foreach ($mappingTable as $mappingKey => $mappingValue) {
+			    // ==== Checking direct match ====
+			    if ($OGTableRecordKey == $mappingValue['pixelplus']) {
+				    # Making a new key with the value of the old key
+				    $OGTableRecord->{$mappingValue['vanherk']} = $OGTableRecordValue;
+				    # Removing the old key
+				    unset($OGTableRecord->{$OGTableRecordKey});
+			    }
+		    }
+	    }
+
+        // ================ Returning the Object ================
         # Return the object
-        return $object;
+	    echo("<pre>"); print_r($OGTableRecord); echo("</pre>");
+        return $OGTableRecord;
     }
 }
 
@@ -524,7 +594,19 @@ class OGOffers {
 		return $post_data;
 	}
 
-	function createPost($postTypeName, $object, $databaseKeys) {
+    function addMedia($postTypeName): void {
+        // ================ Declaring Variables ================
+        # Classes
+        global $wpdb;
+
+        # Vars
+//        $objects = $wpdb->get_results("SELECT ");
+        // ================ Start of Function ================
+
+
+    }
+
+	function createPost($postTypeName, $object, $databaseKeys): void {
 		// ======== Declaring Variables ========
         # Classes
         $ogMapping = new OGMapping();
@@ -536,24 +618,25 @@ class OGOffers {
 			'post_status' => 'draft'
 		];
 		$post_data = $this->getNames($post_data, $object, $databaseKeys);
-		$object = $ogMapping->mapMetaData($postTypeName, $object, $databaseKeys);
+		$object = $ogMapping->mapMetaData($postTypeName, $object);
 
 		// ======== Start of Function ========
-//		# Creating the post
-//		$postID = wp_insert_post($post_data);
-//
-//		# Adding the post meta
-//		foreach ($object as $key => $value) {
-//			add_post_meta($postID, $key, $value);
-//		}
-//
-//		# Adding meta data for images
-//
-//		# Publishing the post
-//		wp_publish_post($postID);
+		# Creating the post
+		$postID = wp_insert_post($post_data);
+
+		# Adding the post meta
+		foreach ($object as $key => $value) {
+			add_post_meta($postID, $key, $value);
+		}
+
+		# Adding meta data for images
+        $this->addMedia($postTypeName);
+
+		# Publishing the post
+		wp_publish_post($postID);
 	}
 
-	function updatePost($postID, $object, $databaseKeys) {
+	function updatePost($postTypeName, $postID, $object, $databaseKeys): void {
 		// ======== Declaring Variables ========
         # Classes
         $ogMapping = new OGMapping();
@@ -564,47 +647,44 @@ class OGOffers {
 			'post_title' => '',
 			'post_content' => ''
 		];
-
 		$post_data = $this->getNames($post_data, $object, $databaseKeys);
+		$object = $ogMapping->mapMetaData($postTypeName, $object);
 
 		// ======== Start of Function ========
-//		# Overwriting the post
-//		wp_update_post($post_data);
-//
-//		# Updating the post meta
-//		foreach ($object as $key => $value) {
-//			update_post_meta($postID, $key, $value);
-//		}
+		# Overwriting the post
+		wp_update_post($post_data);
+
+		# Updating the post meta
+		foreach ($object as $key => $value) {
+			update_post_meta($postID, $key, $value);
+		}
 	}
 
-	function checkPosts($objects, $databaseKeys, $postTypeName) {
+	function checkPosts($objects, $databaseKeys, $postTypeName): void {
 		// ======== Start of Function ========
 		foreach ($objects as $object) {
 			// ==== Declaring Variables ====
-			# Classes
+			# Variables
 			$postData = new WP_Query(([
 				'post_type' => $postTypeName,
 				'meta_key' => $databaseKeys['ID'],
 				'meta_value' => $object->{$databaseKeys['ID']},
 			]));
-
-			# Variables
 			$postExists = $postData->have_posts();
-
 			if ($postExists) {
-				$dataUpdatedPost = $postData->posts[0]->{$databaseKeys['datum_gewijzigd']};
+				$dataUpdatedPost = $postData->posts[0]->{$databaseKeys['datum_gewijzigd_post']};
 			}
 
 			// Database object
 			$tiaraID = $object->{$databaseKeys['ID']};
-			$dataUpdatedObject = $object->{$databaseKeys['datum_gewijzigd']};
+			$dataUpdatedObject = $object->{$databaseKeys['datum_gewijzigd_database']};
 
 			// ==== Start of Function ====
 			if ($postExists) {
 				// Checking if the post is updated
 				if ($dataUpdatedPost != $dataUpdatedObject) {
 					// Updating/overwriting the post
-					$this->updatePost($postData->posts[0]->ID, $object, $databaseKeys);
+					$this->updatePost($postTypeName, $postData->posts[0]->ID, $object, $databaseKeys);
 				}
 			} else {
 				// Creating the post
@@ -613,7 +693,7 @@ class OGOffers {
 		}
 	}
 
-	function examinePosts() {
+	function examinePosts(): void {
 		// ======== Declaring Variables ========
 		# Classes
 		global $wpdb;
