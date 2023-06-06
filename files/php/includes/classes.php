@@ -109,14 +109,16 @@ class OGPostTypeData {
                     'taxonomies' => array('category', 'post_tag')
                 ),
                 'database_tables' => array(
-                    'tbl_og_wonen2' => array(
+                    'object' => array(
+                        'tableName' => 'tbl_og_wonen3',
                         'ID' => 'id',
                         'post_title' => 'objectDetails_Adres_NL_Straatnaam;objectDetails_Adres_NL_Huisnummer;objectDetails_Adres_NL_Woonplaats',
                         'post_content' => 'objectDetails_Aanbiedingstekst',
                         'datum_gewijzigd_database' => 'datum_gewijzigd',
                         'datum_gewijzigd_post' => 'ObjectUpdated',
                     ),
-                    'tbl_OG_media' => array(
+                    'media' => array(
+                        'tableName' => 'tbl_OG_media2',
 	                    'search_id' => 'id_OG_wonen'
                     )
                 )
@@ -149,14 +151,16 @@ class OGPostTypeData {
                     'taxonomies' => array('category', 'post_tag')
                 ),
                 'database_tables' => array(
-                    'ppog_databog2' => array(
+                    'object' => array(
+                        'tableName' => 'ppog_databog2',
                         'ID' => 'id',
                         'post_title' => 'objectDetails_Adres_Straatnaam;objectDetails_Adres_Huisnummer;objectDetails_Adres_Woonplaats',
                         'post_content' => 'objectDetails_Aanbiedingstekst',
                         'datum_gewijzigd_database' => 'datum_gewijzigd',
                         'datum_gewijzigd_post' => 'ObjectUpdated',
                     ),
-                    'tbl_OG_media' => array(
+                    'media' => array(
+                        'tableName' => 'tbl_OG_media2',
                         'search_id' => 'id_OG_bog'
                     )
                 )
@@ -381,7 +385,7 @@ class OGMapping {
 
         // ================ Returning the Object ================
         # Return the object
-	    echo("<pre>"); print_r($OGTableRecord); echo("</pre>");
+//	    echo("<pre>"); print_r($OGTableRecord); echo("</pre>");
         return $OGTableRecord;
     }
 }
@@ -594,19 +598,33 @@ class OGOffers {
 		return $post_data;
 	}
 
-    function addMedia($postTypeName): void {
+    function addMedia($postTypeName, $object, $databaseKeysMedia): void {
         // ================ Declaring Variables ================
         # Classes
         global $wpdb;
-
         # Vars
-//        $objects = $wpdb->get_results("SELECT ");
+        $mime_type_map = [
+	        'jpg' => 'image/jpeg',
+	        'png' => 'image/png',
+	        'pdf' => 'application/pdf',
+        ];
+
+        $objects = $wpdb->get_results("SELECT * FROM `".$databaseKeysMedia['tableName']."` WHERE `".$databaseKeysMedia['search_id']."` = ".$object->id."");
+
         // ================ Start of Function ================
+	    print("Searching for: ".$databaseKeysMedia['search_id']." with id: ".$object->id."<br><br>");
+        foreach ($objects as $object) {
+            // ======== Declaring Variables ========
+            # Vars
+            $post_title = "".$object->media_Id."-".$object->bestandsnaam."";
 
-
+            // ======== Rest of loop ========
+            print($post_title."<br>");
+        }
+        print('<br>');
     }
 
-	function createPost($postTypeName, $object, $databaseKeys): void {
+	function createPost($postTypeName, $object, $databaseKeysObject, $databaseKeysMedia): void {
 		// ======== Declaring Variables ========
         # Classes
         $ogMapping = new OGMapping();
@@ -617,7 +635,7 @@ class OGOffers {
 			'post_content' => '',
 			'post_status' => 'draft'
 		];
-		$post_data = $this->getNames($post_data, $object, $databaseKeys);
+		$post_data = $this->getNames($post_data, $object, $databaseKeysObject);
 		$object = $ogMapping->mapMetaData($postTypeName, $object);
 
 		// ======== Start of Function ========
@@ -630,13 +648,13 @@ class OGOffers {
 		}
 
 		# Adding meta data for images
-        $this->addMedia($postTypeName);
+        $this->addMedia($postTypeName, $object, $databaseKeysMedia);
 
 		# Publishing the post
 		wp_publish_post($postID);
 	}
 
-	function updatePost($postTypeName, $postID, $object, $databaseKeys): void {
+	function updatePost($postTypeName, $postID, $object, $databaseKeysObject, $databaseKeysMedia): void {
 		// ======== Declaring Variables ========
         # Classes
         $ogMapping = new OGMapping();
@@ -647,7 +665,7 @@ class OGOffers {
 			'post_title' => '',
 			'post_content' => ''
 		];
-		$post_data = $this->getNames($post_data, $object, $databaseKeys);
+		$post_data = $this->getNames($post_data, $object, $databaseKeysObject);
 		$object = $ogMapping->mapMetaData($postTypeName, $object);
 
 		// ======== Start of Function ========
@@ -660,35 +678,35 @@ class OGOffers {
 		}
 	}
 
-	function checkPosts($objects, $databaseKeys, $postTypeName): void {
+	function checkPosts($postTypeName, $OGobjects, $databaseKeysObject, $databaseKeysMedia): void {
 		// ======== Start of Function ========
-		foreach ($objects as $object) {
+		foreach ($OGobjects as $object) {
 			// ==== Declaring Variables ====
 			# Variables
 			$postData = new WP_Query(([
 				'post_type' => $postTypeName,
-				'meta_key' => $databaseKeys['ID'],
-				'meta_value' => $object->{$databaseKeys['ID']},
+				'meta_key' => $databaseKeysObject['ID'],
+				'meta_value' => $object->{$databaseKeysObject['ID']},
 			]));
 			$postExists = $postData->have_posts();
 			if ($postExists) {
-				$dataUpdatedPost = $postData->posts[0]->{$databaseKeys['datum_gewijzigd_post']};
+				$dataUpdatedPost = $postData->posts[0]->{$databaseKeysObject['datum_gewijzigd_post']};
 			}
 
 			// Database object
-			$tiaraID = $object->{$databaseKeys['ID']};
-			$dataUpdatedObject = $object->{$databaseKeys['datum_gewijzigd_database']};
+			$tiaraID = $object->{$databaseKeysObject['ID']};
+			$dataUpdatedObject = $object->{$databaseKeysObject['datum_gewijzigd_database']};
 
 			// ==== Start of Function ====
 			if ($postExists) {
 				// Checking if the post is updated
 				if ($dataUpdatedPost != $dataUpdatedObject) {
 					// Updating/overwriting the post
-					$this->updatePost($postTypeName, $postData->posts[0]->ID, $object, $databaseKeys);
+					$this->updatePost($postTypeName, $postData->posts[0]->ID, $object, $databaseKeysObject, $databaseKeysMedia);
 				}
 			} else {
 				// Creating the post
-				$this->createPost($postTypeName, $object, $databaseKeys);
+				$this->createPost($postTypeName, $object, $databaseKeysObject, $databaseKeysMedia);
 			}
 		}
 	}
@@ -706,25 +724,27 @@ class OGOffers {
 		// ======== Start of Function ========s
 		foreach ($postTypeData as $postTypeName => $postTypeArray) {
 			// ==== Declaring Variables ====
-			$databaseTableName = key($postTypeArray['database_tables']);
-			$databaseKeys = $postTypeArray['database_tables'][$databaseTableName];
+            # OG objects
+            $databaseTableObject = $postTypeArray['database_tables']['object']['tableName'];
+			$databaseKeysObject = $postTypeArray['database_tables']['object'];
+            # Media
+            $databaseKeysMedia = $postTypeArray['database_tables']['media'];
 
 			# Getting the database objects
-			$objects = $wpdb->get_results("SELECT * FROM ".$databaseTableName."");
-
+			$OGobjects = $wpdb->get_results("SELECT * FROM ".$databaseTableObject."");
 			# Removing every null out of the objects so Wordpress won't get crazy
-			foreach ($objects as $key => $object) {
+			foreach ($OGobjects as $key => $object) {
 				foreach ($object as $key2 => $value) {
 					if ($value == 'null' or $value == 'NULL' or $value == null) {
-						$objects[$key]->{$key2} = '';
+						$OGobjects[$key]->{$key2} = '';
 					}
 				}
 			}
 
 			// ==== Start of Loop ====
-			if (!empty($objects)) {
+			if (!empty($OGobjects)) {
 				// Looping through the objects and putting them in the right post type
-				$this->checkPosts($objects, $databaseKeys, $postTypeName);
+				$this->checkPosts($postTypeName, $OGobjects, $databaseKeysObject, $databaseKeysMedia);
 			}
 		}
 
