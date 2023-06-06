@@ -446,10 +446,10 @@ class OGMenu {
 
         # Vars
         $postWonen_columns = $ogTableMapping->getPostColumns('wonen');
-        $tableWonen_columns = $ogTableMapping->getTableColumns('tbl_OG_wonen');
+        $tableWonen_columns = $ogTableMapping->getTableColumns('tbl_og_wonen');
 
         $postBOG_columns = $ogTableMapping->getPostColumns('bedrijven');
-        $tableBOG_columns = $ogTableMapping->getTableColumns('tbl_OG_bog');
+        $tableBOG_columns = $ogTableMapping->getTableColumns('ppog_databog');
 
         // ========== Start of Function ==========
         htmlHeader('Pixelplus OG Plugin');
@@ -587,7 +587,14 @@ class OGOffers {
 		// ======== Start of Function ========
 		# Post Title
 		foreach ($postTitle as $title) {
-			$post_data['post_title'] .= $object->{$title}.' ';
+            # Checking if the title is full caps
+            if ($object->{$title} == strtoupper($object->{$title})) {
+                # Make it lowercase and capitalize the first letter
+                $post_data['post_title'] .= ucfirst(strtolower($object->{$title})).' ';
+            }
+            else {
+	            $post_data['post_title'] .= $object->{$title}.' ';
+            }
 		}
 		// Removing the last space
 		$post_data['post_title'] = rtrim($post_data['post_title']);
@@ -729,6 +736,7 @@ class OGOffers {
 			$databaseKeysObject = $postTypeArray['database_tables']['object'];
             # Media
             $databaseKeysMedia = $postTypeArray['database_tables']['media'];
+            # Mapping
 
 			# Getting the database objects
 			$OGobjects = $wpdb->get_results("SELECT * FROM ".$databaseTableObject."");
