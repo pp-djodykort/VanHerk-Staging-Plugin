@@ -22,6 +22,11 @@ function OGUninstallPlugin() {
 }
 
 // ============ HTML Functions ============
+function pre($input): void {
+	echo("<pre>");
+	print_r($input);
+	echo("</pre>");
+}
 function htmlHeader($title): void {
     echo("
 	<head>

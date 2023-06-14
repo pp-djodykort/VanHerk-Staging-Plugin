@@ -11,8 +11,7 @@ class OGActivationAndDeactivation {
     }
 
     // ======== Deactivation ========
-    function deactivate()
-    {
+    function deactivate() {
 
     }
 
@@ -62,121 +61,221 @@ class OGPostTypeData {
         // ===== Declaring Variables =====
         # Variables
         $customPostTypes = array(
-            // Post Type 1
-            /* post_type */'wonen' => array(
+	        /* post_type */'wonen' => array(
+		        'post_type_args' => array(
+			        'labels' => array(
+				        'name' => 'OG Wonen Objecten',
+				        'singular_name' => 'OG Wonen Object',
+				        'add_new' => 'Nieuwe toevoegen',
+				        'add_new_item' => 'Nieuw OG Wonen Object toevoegen',
+				        'edit_item' => 'OG Wonen Object bewerken',
+				        'new_item' => 'Nieuw OG Wonen Object',
+				        'view_item' => 'Bekijk OG Wonen Object',
+				        'search_items' => 'Zoek naar OG Wonen Objecten',
+				        'not_found' => 'Geen OG Wonen Objecten gevonden',
+				        'not_found_in_trash' => 'Geen OG Wonen Objecten gevonden in de prullenbak',
+				        'parent_item_colon' => '',
+				        'menu_name' => 'Wonen'
+			        ),
+			        'post_type_meta' => array(
+				        'meta_box_title' => 'OG Wonen Object',
+				        'meta_box_id' => 'og-wonen-object',
+				        'meta_box_context' => 'normal',
+				        'meta_box_priority' => 'high',
+				        'meta_box_fields' => array(
+					        'OG Wonen Object' => array(
+						        'type' => 'text',
+						        'id' => 'og-wonen-object',
+						        'name' => 'og-wonen-object',
+						        'label' => 'OG Wonen Object',
+						        'placeholder' => 'OG Wonen Object',
+						        'description' => 'OG Wonen Object',
+						        'value' => '',
+						        'required' => true
+					        )
+				        )
+			        ),
+			        'public' => true,
+			        'seperate_table' => true,
+			        'has_archive' => true,
+			        'publicly_queryable' => true,
+			        'query_var' => true,
+			        'capability_type' => 'post',
+			        'hierarchical' => false,
+			        'supports' => array('title', 'editor', 'thumbnail', 'excerpt', 'custom-fields'),
+			        'show_in_menu' => 'pixelplus-og-plugin-aanbod',
+			        'taxonomies' => array('category', 'post_tag')
+		        ),
+		        'database_tables' => array(
+			        'object' => array(
+				        'tableName' => 'tbl_og_wonen',
+				        'ID' => 'id',
+				        'post_title' => 'objectDetails_Adres_NL_Straatnaam;objectDetails_Adres_NL_Huisnummer;objectDetails_Adres_NL_Woonplaats',
+				        'post_content' => 'objectDetails_Aanbiedingstekst',
+				        'datum_gewijzigd_database' => 'datum_gewijzigd',
+				        'datum_gewijzigd_post' => 'ObjectUpdated',
+			        ),
+			        'media' => array(
+				        'tableName' => 'tbl_OG_media',
+				        'search_id' => 'id_OG_wonen',
+				        'object_keys' => array(
+					        'objectTiara' => '_id',
+					        'objectVestiging' => 'ObjectKantoor',
+				        )
+			        ),
+			        # Only if mapping is neccesary uncomment the following lines and fill in the correct table name
+			        'mapping' => array(
+				        'tableName' => 'og_mappingwonen',
+			        )
+		        )
+	        ),
+	        // Post Type 2
+	        /* post_type */'bedrijven' => array(
+		        'post_type_args' => array(
+			        'labels' => array(
+				        'name' => 'OG BOG Objecten',
+				        'singular_name' => 'OG BOG Object',
+				        'add_new' => 'Nieuwe toevoegen',
+				        'add_new_item' => 'Nieuw OG BOG Object toevoegen',
+				        'edit_item' => 'OG BOG Object bewerken',
+				        'new_item' => 'Nieuw OG BOG Object',
+				        'view_item' => 'Bekijk OG BOG Object',
+				        'search_items' => 'Zoek naar OG BOG Objecten',
+				        'not_found' => 'Geen OG BOG Objecten gevonden',
+				        'not_found_in_trash' => 'Geen OG BOG Objecten gevonden in de prullenbak',
+				        'parent_item_colon' => '',
+				        'menu_name' => 'BOG'
+			        ),
+			        'public' => true,
+			        'has_archive' => true,
+			        'publicly_queryable' => true,
+			        'query_var' => true,
+			        'capability_type' => 'post',
+			        'hierarchical' => false,
+			        'supports' => array('title', 'editor', 'thumbnail', 'excerpt', 'custom-fields'),
+			        'show_in_menu' => 'pixelplus-og-plugin-aanbod',
+			        'taxonomies' => array('category', 'post_tag')
+		        ),
+		        'database_tables' => array(
+			        'object' => array(
+				        'tableName' => 'ppog_databog',
+				        'ID' => 'id',
+				        'post_title' => 'objectDetails_Adres_Straatnaam;objectDetails_Adres_Huisnummer;objectDetails_Adres_Woonplaats',
+				        'post_content' => 'objectDetails_Aanbiedingstekst',
+				        'datum_gewijzigd_database' => 'datum_gewijzigd',
+				        'datum_gewijzigd_post' => 'ObjectUpdated',
+			        ),
+			        'media' => array(
+				        'tableName' => 'tbl_OG_media',
+				        'search_id' => 'id_OG_bog',
+			        ),
+			        # Only if mapping is neccesary uncomment the following lines and fill in the correct table name
+			        'mapping' => array(
+				        'tableName' => 'og_mappingbedrijven',
+			        ),
+		        )
+	        ),
+            // Post Type 3
+	        /* post_type */'nieuwbouw' => array(
                 'post_type_args' => array(
                     'labels' => array(
-                        'name' => 'OG Wonen Objecten',
-                        'singular_name' => 'OG Wonen Object',
+                        'name' => 'OG Nieuwbouw Objecten',
+                        'singular_name' => 'OG Nieuwbouw Object',
                         'add_new' => 'Nieuwe toevoegen',
-                        'add_new_item' => 'Nieuw OG Wonen Object toevoegen',
-                        'edit_item' => 'OG Wonen Object bewerken',
-                        'new_item' => 'Nieuw OG Wonen Object',
-                        'view_item' => 'Bekijk OG Wonen Object',
-                        'search_items' => 'Zoek naar OG Wonen Objecten',
-                        'not_found' => 'Geen OG Wonen Objecten gevonden',
-                        'not_found_in_trash' => 'Geen OG Wonen Objecten gevonden in de prullenbak',
+                        'add_new_item' => 'Nieuw OG Nieuwbouw Object toevoegen',
+                        'edit_item' => 'OG Nieuwbouw Object bewerken',
+                        'new_item' => 'Nieuw OG Nieuwbouw Object',
+                        'view_item' => 'Bekijk OG Nieuwbouw Object',
+                        'search_items' => 'Zoek naar OG Nieuwbouw Objecten',
+                        'not_found' => 'Geen OG Nieuwbouw Objecten gevonden',
+                        'not_found_in_trash' => 'Geen OG Nieuwbouw Objecten gevonden in de prullenbak',
                         'parent_item_colon' => '',
-                        'menu_name' => 'Wonen'
+                        'menu_name' => 'Nieuwbouw'
                     ),
-                    'post_type_meta' => array(
-                        'meta_box_title' => 'OG Wonen Object',
-                        'meta_box_id' => 'og-wonen-object',
-                        'meta_box_context' => 'normal',
-                        'meta_box_priority' => 'high',
-                        'meta_box_fields' => array(
-                            'OG Wonen Object' => array(
-                                'type' => 'text',
-                                'id' => 'og-wonen-object',
-                                'name' => 'og-wonen-object',
-                                'label' => 'OG Wonen Object',
-                                'placeholder' => 'OG Wonen Object',
-                                'description' => 'OG Wonen Object',
-                                'value' => '',
-                                'required' => true
+                    'public' => true,
+                    'has_archive' => true,
+                    'publicly_queryable' => true,
+                    'query_var' => true,
+                    'capability_type' => 'post',
+                    'hierarchical' => false,
+                    'supports' => array('title', 'editor', 'thumbnail', 'excerpt', 'custom-fields'),
+                    'show_in_menu' => 'pixelplus-og-plugin-aanbod',
+                    'taxonomies' => array('category', 'post_tag')
+                ),
+                'database_tables' => array(
+                    'projecten' => array(
+                        # TableName
+                        'tableName' => 'tbl_og_nieuwbouw_projecten',
+                        # Normal fields
+                        'ID' => 'id',
+                        'post_title' => 'project_ProjectDetails_Projectnaam',
+                        'post_content' => 'project_ProjectDetails_Presentatie_Aanbiedingstekst',
+                        'ObjectStatus_database' => 'project_ProjectDetails_Status_ObjectStatus',
+                        'datum_gewijzigd_database' => 'datum_gewijzigd',
+                        'datum_gewijzigd_post' => 'ObjectUpdated',
+
+                        # Post fields
+                        'media' => array(
+                            'tableName' => 'tbl_og_media',
+                            'search_id' => 'id_OG_nieuwbouw_projecten',
+                            'object_keys' => array(
+	                            'objectTiara' => '_id',
+	                            'objectVestiging' => 'ObjectKantoor',
                             )
+                        ),
+                        'mapping' => array(
+                            'tableName' => 'og_mappingNieuwbouwProjecten',
                         )
                     ),
-                    'public' => true,
-                    'seperate_table' => true,
-                    'has_archive' => true,
-                    'publicly_queryable' => true,
-                    'query_var' => true,
-                    'capability_type' => 'post',
-                    'hierarchical' => false,
-                    'supports' => array('title', 'editor', 'thumbnail', 'excerpt', 'custom-fields'),
-                    'show_in_menu' => 'pixelplus-og-plugin-aanbod',
-                    'taxonomies' => array('category', 'post_tag')
-                ),
-                'database_tables' => array(
-                    'object' => array(
-                        'tableName' => 'tbl_og_wonen',
+                    'bouwTypes' => array(
+                        # TableName
+                        'tableName' => 'tbl_og_nieuwbouw_bouwtypes',
+                        # Normal fields
                         'ID' => 'id',
-                        'post_title' => 'objectDetails_Adres_NL_Straatnaam;objectDetails_Adres_NL_Huisnummer;objectDetails_Adres_NL_Woonplaats',
-                        'post_content' => 'objectDetails_Aanbiedingstekst',
+                        'id_projecten' => 'id_OG_nieuwbouw_projecten',
+                        'post_title' => 'bouwType_BouwTypeDetails_Naam',
+                        'post_content' => 'bouwType_BouwTypeDetails_Aanbiedingstekst',
                         'datum_gewijzigd_database' => 'datum_gewijzigd',
                         'datum_gewijzigd_post' => 'ObjectUpdated',
-                    ),
-                    'media' => array(
-                        'tableName' => 'tbl_OG_media',
-	                    'search_id' => 'id_OG_wonen',
-                        'object_keys' => array(
-                            'objectTiara' => '_id',
-                            'objectVestiging' => 'ObjectKantoor',
+
+                        # Post fields
+                        'media' => array(
+                            'tableName' => 'tbl_og_media',
+                            'search_id' => 'id_OG_nieuwbouw_bouwtypes',
+                            'object_keys' => array(
+	                            'objectTiara' => '_id',
+	                            'objectVestiging' => 'ObjectKantoor',
+                            )
+                        ),
+                        'mapping' => array(
+                            'tableName' => 'og_mappingNieuwbouwBouwTypes',
                         )
                     ),
-	                # Only if mapping is neccesary uncomment the following lines and fill in the correct table name
-                    'mapping' => array(
-                        'tableName' => 'og_mappingwonen',
-                    )
-                )
-            ),
-            // Post Type 2
-            /* post_type */'bedrijven' => array(
-                'post_type_args' => array(
-                    'labels' => array(
-                        'name' => 'OG BOG Objecten',
-                        'singular_name' => 'OG BOG Object',
-                        'add_new' => 'Nieuwe toevoegen',
-                        'add_new_item' => 'Nieuw OG BOG Object toevoegen',
-                        'edit_item' => 'OG BOG Object bewerken',
-                        'new_item' => 'Nieuw OG BOG Object',
-                        'view_item' => 'Bekijk OG BOG Object',
-                        'search_items' => 'Zoek naar OG BOG Objecten',
-                        'not_found' => 'Geen OG BOG Objecten gevonden',
-                        'not_found_in_trash' => 'Geen OG BOG Objecten gevonden in de prullenbak',
-                        'parent_item_colon' => '',
-                        'menu_name' => 'BOG'
-                    ),
-                    'public' => true,
-                    'has_archive' => true,
-                    'publicly_queryable' => true,
-                    'query_var' => true,
-                    'capability_type' => 'post',
-                    'hierarchical' => false,
-                    'supports' => array('title', 'editor', 'thumbnail', 'excerpt', 'custom-fields'),
-                    'show_in_menu' => 'pixelplus-og-plugin-aanbod',
-                    'taxonomies' => array('category', 'post_tag')
-                ),
-                'database_tables' => array(
-                    'object' => array(
-                        'tableName' => 'ppog_databog',
+                    'bouwNummers' => array(
+                        # TableName
+                        'tableName' => 'tbl_og_nieuwbouw_bouwnummers',
+                        # Normal fields
                         'ID' => 'id',
-                        'post_title' => 'objectDetails_Adres_Straatnaam;objectDetails_Adres_Huisnummer;objectDetails_Adres_Woonplaats',
-                        'post_content' => 'objectDetails_Aanbiedingstekst',
+                        'post_title' => 'Adres_Straatnaam;Adres_Huisnummer;Adres_Postcode;Adres_Woonplaats',
+                        'post_content' => 'Aanbiedingstekst',
                         'datum_gewijzigd_database' => 'datum_gewijzigd',
                         'datum_gewijzigd_post' => 'ObjectUpdated',
-                    ),
-                    'media' => array(
-                        'tableName' => 'tbl_OG_media',
-                        'search_id' => 'id_OG_bog',
-                    ),
-                    # Only if mapping is neccesary uncomment the following lines and fill in the correct table name
-                    'mapping' => array(
-                        'tableName' => 'og_mappingbedrijven',
+
+                        # Post fields
+                        'media' => array(
+                            'tableName' => 'tbl_og_media',
+                            'search_id' => 'id_OG_nieuwbouw_bouwnummers',
+                            'object_keys' => array(
+	                            'objectTiara' => '_id',
+	                            'objectVestiging' => 'ObjectKantoor',
+                            )
+                        ),
+                        'mapping' => array(
+                            'tableName' => 'og_mappingNieuwbouwBouwNummers',
+                        )
                     ),
                 )
-            ),
+            )
         );
 
         // ===== Start of Construct =====
@@ -229,7 +328,7 @@ class WPColorScheme {
 class OGSettingsData {
     // ============ Declare Variables ============
     // Strings
-    public $settingPrefix = 'ppOG_'; // This is the prefix for all the settings used within the OG Plugin
+    public $settingPrefix = 'ppOG_'; // This is the prefix for all the settings used within the OG Plugin.
     public $cacheFolder = 'caches/'; // This is the folder where all the cache files are stored within the server/ftp
     // Arrays
     public array $apiURLs = [
@@ -458,8 +557,8 @@ class OGMenu {
         $ogTableMapping = new OGTableMappingDisplay();
 
         # Vars
-        $postWonen_columns = $ogTableMapping->getPostColumns('wonen');
-        $tableWonen_columns = $ogTableMapping->getTableColumns('tbl_og_wonen');
+        $postWonen_columns = $ogTableMapping->getPostColumns('nieuwbouw');
+        $tableWonen_columns = $ogTableMapping->getTableColumns('tbl_og_nieuwbouw_bouwtypes');
 
         $postBOG_columns = $ogTableMapping->getPostColumns('bedrijven');
         $tableBOG_columns = $ogTableMapping->getTableColumns('ppog_databog');
@@ -477,7 +576,7 @@ class OGMenu {
                         }
 echo("              </div>
                     <div class='col'>");
-                        if (!empty($postBOG_columns)) {
+                        if (!empty($tableWonen_columns)) {
 	                        foreach ($tableWonen_columns as $key => $value) {
 		                        echo("<p>".$value->Field."</p>");
 	                        }
@@ -498,6 +597,7 @@ class OGTableMappingDisplay {
     // ============ Constructor ============
     function __construct() {
         // ========== Start of Function ==========
+        
     }
 
     // ================ Begin of Class ================
@@ -589,7 +689,7 @@ class OGOffers {
         // add_action('admin_init', array($this, 'examinePosts'));
 
         # Use this one if it is going to be a cronjob.
-       $this->examinePosts();
+        $this->examinePosts();
 	}
 
 	// ================ Functions ================
@@ -633,8 +733,6 @@ class OGOffers {
         $results = $wpdb->get_results("SELECT * FROM `".$databaseKeysMedia['tableName']."` WHERE `".$databaseKeysMedia['search_id']."` = ".$object->id."");
 
         // ================ Start of Function ================
-        print("Searching for: ".$databaseKeysMedia['search_id']." with id: ".$object->id."<br><br>");
-
         $media_data = array();
         foreach ($results as $result) {
             // ======== Declaring Variables ========
@@ -642,7 +740,7 @@ class OGOffers {
             $post_title = "".$result->media_Id."-".$result->bestandsnaam."";
             $post_mime_type = $mime_type_map[$result->{'bestands_extensie'}];
 
-            $media_url = "og_media/{$postTypeName}_{$object->{$databaseKeysMedia['object_keys']['objectVestiging']}}_{$object->{$databaseKeysMedia['object_keys']['objectTiara']}}/{$object->{$databaseKeysMedia['object_keys']['objectTiara']}}}_{$result->media_Id}.{$result->bestands_extensie}";
+            $media_url = "og_media/{$postTypeName}_{$object->{$databaseKeysMedia['object_keys']['objectVestiging']}}_{$object->{$databaseKeysMedia['object_keys']['objectTiara']}}/{$object->{$databaseKeysMedia['object_keys']['objectTiara']}}_{$result->media_Id}.{$result->bestands_extensie}";
 
             $post_data = [
                 'post_content' => '',
@@ -672,7 +770,6 @@ class OGOffers {
                     '_id' => $result->{'media_Id'},
                 ),
             );
-            print($media_url);
         }
         print('<br>');
 
@@ -686,14 +783,12 @@ class OGOffers {
 
             if (empty($query)) {
                 $mediaID = wp_insert_post($media['post_data']);
-
+	            print('Creating MediaID: '.$mediaID.'<br>');
                 foreach ($media['post_meta'] as $key => $value) {
                     wp_set_object_terms($mediaID, $value, $key);
                 }
-
-                echo 'created ' . $mediaID . PHP_EOL;
-
-            } else {
+            }
+            else {
                 $post_data = $media['post_data'];
                 $post_data['ID'] = $query[0]->ID;
                 wp_update_post($post_data);
@@ -701,19 +796,18 @@ class OGOffers {
                 foreach ($media['post_meta'] as $key => $value) {
                     wp_set_object_terms($query[0]->ID, $value, $key);
                 }
-
-                echo 'updated ' . $post_data['ID'] . PHP_EOL;
             }
         }
     }
 
-	function createPost($postTypeName, $object, $databaseKeysObject, $databaseKeysMedia, $databaseKeysMapping): void {
+	function createPost($postTypeName, $object, $databaseKeysObject, $databaseKeysMedia, $databaseKeysMapping, $parentPostID=''): WP_Error|int {
 		// ======== Declaring Variables ========
         # Classes
         $ogMapping = new OGMapping();
         # Vars
 		$post_data = [
 			'post_type' => $postTypeName,
+            'post_parent' => $parentPostID,
 			'post_title' => '',
 			'post_content' => '',
 			'post_status' => 'draft'
@@ -724,7 +818,6 @@ class OGOffers {
 		// ======== Start of Function ========
 		# Creating the post
 		$postID = wp_insert_post($post_data);
-
 		# Adding the post meta
 		foreach ($object as $key => $value) {
 			add_post_meta($postID, $key, $value);
@@ -735,9 +828,12 @@ class OGOffers {
 
 		# Publishing the post
 		wp_publish_post($postID);
+
+        # Returning the postID
+        return $postID;
 	}
 
-	function updatePost($postTypeName, $postID, $object, $databaseKeysObject, $databaseKeysMedia, $databaseKeysMapping): void {
+	function updatePost($postTypeName, $postID, $object, $databaseKeysObject, $databaseKeysMedia, $databaseKeysMapping, $parentPostID=''): void {
 		// ======== Declaring Variables ========
         # Classes
         $ogMapping = new OGMapping();
@@ -746,6 +842,7 @@ class OGOffers {
 		$post_data = [
 			'ID' => $postID,
 			'post_title' => '',
+			'post_parent' => $parentPostID,
 			'post_content' => ''
 		];
 		$post_data = $this->getNames($post_data, $object, $databaseKeysObject);
@@ -800,13 +897,105 @@ class OGOffers {
                 }
                 print('Deleted post: ' . $post->ID . '<br>');
             }
-            else {
-                print('Post: ' . $postID . ' is still in the database<br>');
-            }
         }
     }
 
-	function checkPosts($postTypeName, $OGobjects, $databaseKeysObject, $databaseKeysMedia, $databaseKeysMapping): void {
+    function checkNieuwbouwBouwtypes($postTypeName, $boolPostAlreadyExisted, $parentPostID, $parentDBObject, $databaseKeys, $databaseKeysMedia, $databaseKeysMapping) {
+        // ======== Declaring Variables ========
+        # Classes
+        global $wpdb;
+
+        # Vars
+        $objectIDs = [];
+        $objectDBObjects = $wpdb->get_results("SELECT * FROM {$databaseKeys['tableName']} WHERE {$databaseKeys['id_projecten']} = {$parentDBObject->{$databaseKeys['ID']}}");
+        // ======== Start of Function ========
+        # Checking if I need to update the post or create a new one
+        foreach ($objectDBObjects as $objectDBObject) {
+	        if ($boolPostAlreadyExisted) {
+                # Updating the post
+                print('Updating child post: ' . $objectDBObject->{$databaseKeys['ID']} . '<br>');
+
+            }
+            else {
+                # Creating the post
+                $postID = $this->createPost($postTypeName, $objectDBObject, $databaseKeys, $databaseKeysMedia, $databaseKeysMapping, $parentPostID);
+	            print('Creating child post: ' . $objectDBObject->{$databaseKeys['ID']} . '<br>');
+	        }
+	        array_push($objectIDs, $objectDBObject->{$databaseKeys['ID']});
+        }
+    }
+
+    function checkNieuwbouwProjecten($postTypeName, $keysValue): void {
+        // ============ Declaring Variables ============
+        # Classes
+        global $wpdb;
+        # Vars
+        $objectIDs = [];
+	    // Getting the objects
+	    $OGProjects = $wpdb->get_results("SELECT * FROM {$keysValue[0]['tableName']}");
+
+        // ============ Start of Program ============
+        # Removing all the null value's so WordPress won't get crazy.
+        foreach ($OGProjects as $key => $object) {
+            foreach ($object as $key2 => $value) {
+                if ($value == 'null' or $value == 'NULL' or $value == null) {
+                    $OGProjects[$key]->{$key2} = '';
+                }
+            }
+        }
+
+        # Looping through all the OG Projects and adding them to the wp_posts
+        foreach($OGProjects as $object) {
+            if (isset($object->{$keysValue[0]['ObjectStatus_database']}) AND $object->{$keysValue[0]['ObjectStatus_database']} == '') {
+                continue;
+            }
+            // ==== Declaring Variables ====
+            // ==== Post - Project ====
+            $postData = new WP_Query(([
+                'post_type' => $postTypeName,
+                'meta_key' => $keysValue[0]['ID'],
+                'meta_value' => $object->{$keysValue[0]['ID']},
+            ]));
+            $projectExisted = $postData->have_posts();
+
+	        // ==== Database object ====
+	        $dataUpdatedObject = $object->{$keysValue[0]['datum_gewijzigd_database']};
+
+
+            if ($projectExisted) {
+	            // ==== Post - Project ====
+                $postID = $postData->posts[0]->ID;
+                $dataUpdatedPost = $postData->posts[0]->{$keysValue[0]['datum_gewijzigd_post']};
+            }
+            // ==== Rest of loop ====
+            if ($projectExisted) {
+                // Checking if the post is updated
+                if ($dataUpdatedPost != $dataUpdatedObject) {
+	                print('Object updated:'.$dataUpdatedObject . '<br>');
+                    print($object->{$keysValue[0]['ID']} . ' is updated<br>');
+                    // Updating/overwriting the post
+                    print('Updating post: ' . $postData->posts[0]->ID . '<br>');
+	                print('Post updated:'.$dataUpdatedPost . '<br>');
+                    $this->updatePost($postTypeName, $postData->posts[0]->ID, $object, $keysValue[0], $keysValue[0]['media'], $keysValue[0]['mapping']);
+                }
+            }
+            else {
+                // Creating the post
+                $postID = $this->createPost($postTypeName, $object, $keysValue[0], $keysValue[0]['media'], $keysValue[0]['mapping']);
+                print('Creating PostID: '.$postID.'<br>');
+            }
+            print('<br>');
+            # Adding the postID to the array
+            array_push($objectIDs, $object->{$keysValue[0]['ID']});
+
+            # Check the childposts
+//            $this->checkNieuwbouwBouwtypes($postTypeName, $projectExisted, $postID, $object, $keysValue[1], $keysValue[1]['media'], $keysValue[1]['mapping']);
+        }
+
+	    $this->deleteUnneededPosts($postTypeName, $keysValue[0], $objectIDs);
+    }
+
+	function checkNormalPosts($postTypeName, $OGobjects, $databaseKeysObject, $databaseKeysMedia, $databaseKeysMapping): void {
         // ======== Declaring Variables ========
         # Vars
         $objectIDs = [];
@@ -827,7 +1016,6 @@ class OGOffers {
 			}
 
 			// Database object
-			$tiaraID = $object->{$databaseKeysObject['ID']};
 			$dataUpdatedObject = $object->{$databaseKeysObject['datum_gewijzigd_database']};
 
 			// ==== Start of Function ====
@@ -837,13 +1025,14 @@ class OGOffers {
 					// Updating/overwriting the post
 					$this->updatePost($postTypeName, $postData->posts[0]->ID, $object, $databaseKeysObject, $databaseKeysMedia, $databaseKeysMapping);
 				}
-			} else {
+			}
+            else {
 				// Creating the post
 				$this->createPost($postTypeName, $object, $databaseKeysObject, $databaseKeysMedia, $databaseKeysMapping);
 			}
                 
             # Adding the object ID to the array
-            array_push($objectIDs, $object->{'id'});
+            array_push($objectIDs, $object->{$databaseKeysObject['ID']});
 		}
 
         # ======== Deleting the posts ========
@@ -863,37 +1052,55 @@ class OGOffers {
 
 		// ================ Start of Function ================
 		foreach ($postTypeData as $postTypeName => $postTypeArray) {
+            if ($postTypeName == 'wonen' or $postTypeName == 'bedrijven') {
+                continue;
+            }
 			// ==== Declaring Variables ====
-            # OG objects
-            $databaseTableObject = $postTypeArray['database_tables']['object']['tableName'];
-			$databaseKeysObject = $postTypeArray['database_tables']['object'];
-            # Media
-            $databaseKeysMedia = $postTypeArray['database_tables']['media'];
-            # Mapping
-            if (isset($postTypeArray['database_tables']['mapping'])) {
-                $databaseKeysMapping = $postTypeArray['database_tables']['mapping'];
+            $boolIsNieuwbouw = !isset($postTypeArray['database_tables']['object']);
+
+            if ($boolIsNieuwbouw) {
+	            # OG objects
+                $databaseKeys[0] = $postTypeArray['database_tables']['projecten'];
+	            $databaseKeys[1] = $postTypeArray['database_tables']['bouwTypes'];
+	            $databaseKeys[2] = $postTypeArray['database_tables']['bouwNummers'];
             }
             else {
-                $databaseKeysMapping = null;
-			}
+                # OG objects
+	            $databaseTableNamesObjects[0] = $postTypeArray['database_tables']['object']['tableName'];
+	            $databaseKeysObject = $postTypeArray['database_tables']['object'];
 
-			# Getting the database objects
-			$OGobjects = $wpdb->get_results("SELECT * FROM ".$databaseTableObject."");
-			# Removing every null out of the objects so Wordpress won't get crazy
-			foreach ($OGobjects as $key => $object) {
-				foreach ($object as $key2 => $value) {
-					if ($value == 'null' or $value == 'NULL' or $value == null) {
-						$OGobjects[$key]->{$key2} = '';
-					}
-				}
-			}
+	            # Media
+	            $databaseKeysMedia = $postTypeArray['database_tables']['media'];
+
+	            # Mapping
+	            $databaseKeysMapping = isset($postTypeArray['database_tables']['mapping']) ? $postTypeArray['database_tables']['mapping'] : null;
+            }
 
 			// ==== Start of Loop ====
-			if (!empty($OGobjects)) {
-				// Looping through the objects and putting them in the right post type
-				$this->checkPosts($postTypeName, $OGobjects, $databaseKeysObject, $databaseKeysMedia, $databaseKeysMapping);
-			}
+            if ($boolIsNieuwbouw) {
+                print('checking nieuwbouw'.'<br>');
+	            $this->checkNieuwbouwProjecten($postTypeName, $databaseKeys);
+            }
+            else {
+	            foreach ($databaseTableNamesObjects as $databaseTableNameObject) {
+		            $OGobjects = $wpdb->get_results("SELECT * FROM {$databaseTableNameObject}");
+
+		            # Removing every null out of the objects so Wordpress won't get crazy.
+		            foreach ($OGobjects as $key => $object) {
+			            foreach ($object as $key2 => $value) {
+				            if ($value == 'null' or $value == 'NULL' or $value == null) {
+					            $OGobjects[$key]->{$key2} = '';
+				            }
+			            }
+		            }
+
+		            if (!empty($OGobjects)) {
+                        $this->checkNormalPosts($postTypeName, $OGobjects, $databaseKeysObject, $databaseKeysMedia, $databaseKeysMapping);
+		            }
+	            }
+            }
 		}
+
 		// Putting in the database how much memory it ended up using maximum from bytes to megabytes
 		$maxMemoryUsage = (memory_get_peak_usage(true) / 1024 / 1024);
 		$memoryUsage = (memory_get_usage(true) / 1024 / 1024);
@@ -906,4 +1113,71 @@ class OGOffers {
 			'duration' => round((time() - $beginTime) / 60, 2)
 		]);
 	}
+}
+
+class OGLookieLookie {
+    function __construct() {
+//        add_action('init', [$this, 'lookieBouwtypes']);
+//        add_action('init', [$this, 'lookieBouwnummers']);
+    }
+
+    function lookieBouwtypes() {
+        // ================ Declaring Variables ================
+        # Classes
+        global $wpdb;
+
+        # Variables
+	    $arraya = [];
+        // Connecting to database
+        $db = new $wpdb('admin_og-wp', '6OMaa8GpC', 'admin_vhbackup', 'orel.pixelplus.nl');
+
+        $results = $db->get_results("SELECT ID FROM `wp_posts` WHERE `post_parent` = 0 AND `post_type` = 'nieuwbouw'");
+
+        // ================ Start of Function ================
+        foreach ($results as $result) {
+            $id = $result->ID;
+
+            $results2 = $db->get_results("SELECT ID FROM `wp_posts` WHERE `post_parent` = {$id} AND `post_type` = 'nieuwbouw'");
+
+            foreach($results2 as $result2) {
+	            $id = $result2->ID;
+                array_push($arraya, $id);
+            }
+        }
+        # Getting all the DISTINCT meta_keys from the post meta of all those records with post_id
+        $results3 = $db->get_results("SELECT DISTINCT meta_key, meta_value FROM `wp_postmeta` WHERE `post_id` IN (" . implode(',', $arraya) . ")");
+        pre($results3);
+    }
+
+    function lookieBouwnummers() {
+	    // ================ Declaring Variables ================
+	    # Classes
+	    global $wpdb;
+
+	    # Variables
+	    $arraya = [];
+	    // Connecting to database
+	    $db = new $wpdb('admin_og-wp', '6OMaa8GpC', 'admin_vhbackup', 'orel.pixelplus.nl');
+
+	    $results = $db->get_results("SELECT ID FROM `wp_posts` WHERE `post_parent` = 0 AND `post_type` = 'nieuwbouw'");
+
+	    // ================ Start of Function ================
+	    foreach ($results as $result) {
+		    $id = $result->ID;
+
+		    $results2 = $db->get_results("SELECT ID FROM `wp_posts` WHERE `post_parent` = {$id} AND `post_type` = 'nieuwbouw'");
+
+		    foreach($results2 as $result2) {
+			    $id = $result2->ID;
+			    $results3 = $db->get_results("SELECT ID FROM `wp_posts` WHERE `post_parent` = {$id} AND `post_type` = 'nieuwbouw'");
+                foreach($results3 as $result3) {
+                    $id = $result3->ID;
+                    array_push($arraya, $id);
+                }
+		    }
+	    }
+        # Getting all the DISTINCT meta_keys from the post meta of all those records with post_id
+        $results4 = $db->get_results("SELECT DISTINCT meta_key, meta_value FROM `wp_postmeta` WHERE `post_id` IN (" . implode(',', $arraya) . ")");
+        pre($results4);
+    }
 }

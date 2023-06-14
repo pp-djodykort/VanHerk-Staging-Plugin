@@ -21,7 +21,7 @@ register_uninstall_hook(__FILE__, 'OGUninstallPlugin');
 // ============ Classes initialisation ============
 $menuItems = new OGMenu();
 $cpt = new OGPostTypes();
-// $test = new OGOffers();
+//$test = new OGLookieLookie();
 
 // ============ Start ============
-adminNotice('sucess', getLoadTime());
+adminNotice('success', getLoadTime());
