@@ -27,6 +27,9 @@ function pre($input): void {
 	print_r($input);
 	echo("</pre>");
 }
+function br(): void {
+	echo("<br/>");
+}
 function htmlHeader($title): void {
     echo("
 	<head>
