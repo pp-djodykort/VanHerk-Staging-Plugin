@@ -25,3 +25,4 @@ $cpt = new OGPostTypes();
 
 // ============ Start ============
 adminNotice('success', getLoadTime());
+adminNotice('cock', get_site_url());

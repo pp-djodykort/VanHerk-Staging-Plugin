@@ -23,9 +23,16 @@ function OGUninstallPlugin() {
 
 // ============ HTML Functions ============
 function pre($input): void {
-	echo("<pre>");
-	print_r($input);
-	echo("</pre>");
+	if (is_array($input)) {
+		echo('<pre>');
+		foreach ($input as $value) {
+			print_r($value);
+		}
+		echo('</pre>');
+	}
+	else {
+		echo('<pre>'); print_r($input); echo('</pre>');
+	}
 }
 function br(): void {
 	echo("<br/>");
@@ -45,6 +52,7 @@ function htmlHeader($title): void {
                 <span class='floatLeft'><h1><b>$title</b></h1></span>
                 <span class='floatRight'><h5>".welcomeMessage()."</h5></span>
             </div>
+        </div>
 	</header>
 	<hr/>
 	");
@@ -53,7 +61,6 @@ function htmlFooter($title): void {
     echo("
 	<!-- Bootstrap -->
 	<script src='".plugins_url('js/bootstrap.min.js', dirname(__DIR__))."'></script>
-	</div>
 	");
 }
 function welcomeMessage(): string {
