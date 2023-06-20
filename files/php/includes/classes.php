@@ -586,12 +586,16 @@ class OGMapping {
 				                    $explodedRecordValue = trim($explodedRecordValue, '[]');
 				                    $strResult .= $explodedRecordValue.', ';
 			                    }
+			                    # Step 5: Removing the old key
+			                    if ($strResult != '') {
+				                    unset($OGTableRecord->{$arrExplodedKeyValue});
+			                    }
 		                    }
 	                    }
-	                    # Step 5: Putting it in the mapping table as a default value
-	                    $mappingTable[$mappingKey]['pixelplus'] = ucfirst(strtolower("'".rtrim($strResult, ', ')."'"));
-                    }
+	                    # Step 6: Putting it in the mapping table as a default value
+	                    $mappingTable[$mappingKey]['pixelplus'] = "'".ucfirst(strtolower(rtrim($strResult, ', ')."'"));
 
+                    }
                 }
 	        }
 	        # Looping through the mapping table with the updated values
@@ -626,7 +630,6 @@ class OGMapping {
 
         // ================ Returning the Object ================
         # Return the object
-//	    echo("<pre>"); print_r($OGTableRecord); echo("</pre>");
         return $OGTableRecord;
     }
 }
