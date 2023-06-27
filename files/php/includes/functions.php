@@ -23,16 +23,7 @@ function OGUninstallPlugin() {
 
 // ============ HTML Functions ============
 function pre($input): void {
-	if (is_array($input)) {
-		echo('<pre>');
-		foreach ($input as $value) {
-			print_r($value);
-		}
-		echo('</pre>');
-	}
-	else {
-		echo('<pre>'); print_r($input); echo('</pre>');
-	}
+	echo('<pre>'); print_r($input); echo('</pre>');
 }
 function br(): void {
 	echo("<br/>");

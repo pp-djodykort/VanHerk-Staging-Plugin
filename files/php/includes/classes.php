@@ -5,7 +5,7 @@ include_once("functions.php");
 // ==== Activation and Deactivation (Uninstallation is in the functions.php because it needs to be a static function) ====
 class OGActivationAndDeactivation {
     // ======== Activation ========
-    function activate() {
+    function activate(): void {
         $this->registerSettings();
         $this->createCacheFiles();
     }
@@ -17,7 +17,7 @@ class OGActivationAndDeactivation {
 
     // ============ Functions ============
     // A function for registering base settings of the unactivated plugin as activation hook.
-    function registerSettings() {
+    function registerSettings(): void {
         // ==== Declaring Variables ====
         $settingData = new OGSettingsData();
 
@@ -28,7 +28,7 @@ class OGActivationAndDeactivation {
         }
     }
 
-    function createCacheFiles() {
+    function createCacheFiles(): void {
         // ==== Declaring Variables ====
         # Classes
         $settingsData = new OGSettingsData();
@@ -57,7 +57,7 @@ class OGActivationAndDeactivation {
 // ==== Data Classes ====
 class OGPostTypeData {
     // ============ Begin of Class ============
-	function customPostTypes() {
+	function customPostTypes(): array {
 		// ===== Declaring Variables =====
 		# Variables
 		$customPostTypes = array(
@@ -248,7 +248,7 @@ class OGPostTypeData {
 				'database_tables' => array(
 					'projecten' => array(
 						# TableName
-						'tableName' => 'tbl_OG_nieuwbouw_projecten',
+						'tableName' => 'tbl_og_nieuwbouw_projecten',
 						# Normal fields
 						'ID' => '_id',
 						'post_title' => 'project_ProjectDetails_Projectnaam',
@@ -257,6 +257,7 @@ class OGPostTypeData {
 						'datum_gewijzigd' => 'ObjectUpdated',
 						'datum_toegevoegd' => 'ObjectDate',
 						'objectCode' => 'ObjectCode',
+                        'type' => 'project',
 
 						# Post fields
 						'media' => array(
@@ -288,15 +289,17 @@ class OGPostTypeData {
 					),
 					'bouwTypes' => array(
 						# TableName
-						'tableName' => 'tbl_OG_nieuwbouw_bouwTypes',
+						'tableName' => 'tbl_og_nieuwbouw_bouwtypes',
 						# Normal fields
 						'ID' => '_id',
 						'id_projecten' => 'id_OG_nieuwbouw_projecten',
-						'post_title' => 'bouwType_BouwTypeDetails_Naam',
+						'post_title' => 'bouwType_BouwTypeDetails_Naam|ObjectCode',
 						'post_content' => 'bouwType_BouwTypeDetails_Aanbiedingstekst',
+                        'ObjectStatus_database' => 'bouwType_BouwTypeDetails_Status_ObjectStatus',
 						'datum_gewijzigd' => 'ObjectUpdated',
 						'datum_toegevoegd' => 'ObjectDate',
 						'objectCode' => 'ObjectCode',
+                        'type' => 'bouwtype',
 
 						# Post fields
 						'media' => array(
@@ -328,14 +331,17 @@ class OGPostTypeData {
 					),
 					'bouwNummers' => array(
 						# TableName
-						'tableName' => 'tbl_OG_nieuwbouw_bouwNummers',
+						'tableName' => 'tbl_og_nieuwbouw_bouwnummers',
 						# Normal fields
 						'ID' => '_id',
+                        'id_bouwtypes' => 'id_OG_nieuwbouw_bouwTypes',
 						'post_title' => 'Adres_Straatnaam;Adres_Huisnummer;Adres_Postcode;Adres_Woonplaats',
 						'post_content' => 'Aanbiedingstekst',
+						'ObjectStatus_database' => 'bouwNummer_ObjectCode',
 						'datum_gewijzigd' => 'ObjectUpdated',
 						'datum_toegevoegd' => 'ObjectDate',
 						'objectCode' => 'ObjectCode',
+                        'type' => 'bouwnummer',
 
 						# Post fields
 						'media' => array(
@@ -404,9 +410,8 @@ class WPColorScheme {
         // ======== Declaring Variables ========
         global $_wp_admin_css_colors;
         $WPColorScheme = get_user_option('admin_color');
-        $boolResult = false;
 
-        // ======== Start of Function ========
+	    // ======== Start of Function ========
         foreach ($this->mainColors as $key => $value) {
             if ($key == $WPColorScheme) {
                 return $_wp_admin_css_colors[$WPColorScheme]->colors[$this->mainColors[$key]];
@@ -418,8 +423,8 @@ class WPColorScheme {
 class OGSettingsData {
     // ============ Declare Variables ============
     // Strings
-    public $settingPrefix = 'ppOG_'; // This is the prefix for all the settings used within the OG Plugin.
-    public $cacheFolder = 'caches/'; // This is the folder where all the cache files are stored within the server/ftp
+    public string $settingPrefix = 'ppOG_'; // This is the prefix for all the settings used within the OG Plugin.
+    public string $cacheFolder = 'caches/'; // This is the folder where all the cache files are stored within the server/ftp
     // Arrays
     public array $apiURLs = [
         'license' => 'https://og-feeds2.pixelplus.nl/api/validate.php',
@@ -485,7 +490,7 @@ class OGMapping {
 
     // ================ Begin of Class ================
     function mapMetaData($postTypeName, $OGTableRecord, $databaseKeysMapping) {
-        if (isset($databaseKeysMapping)) {
+        if (!empty($databaseKeysMapping)) {
 	        // ======== Declaring Variables ========
 	        # Classes
 	        global $wpdb;
@@ -826,25 +831,39 @@ class OGOffers {
 
     // ================ Functions ================
 	function getNames($post_data, $object, $databaseKey) {
-		// ======== Declaring Variables ========
-		$postTitle = explode(';', $databaseKey['post_title']);
+		// Check if the post_title contains '|' or ';' to determine if to concatenate or just use one
+		if (strpos($databaseKey['post_title'], '|') !== false) {
+			$postTitle = explode('|', $databaseKey['post_title']);
+			$title = $postTitle[0];
 
-		// ======== Start of Function ========
-		# Post Title
-		foreach ($postTitle as $title) {
-			# Checking if the title is full caps
-			if ($object->{$title} == strtoupper($object->{$title})) {
-				# Make it lowercase and capitalize the first letter
-				$post_data['post_title'] .= ucfirst(strtolower($object->{$title})).' ';
+            # Check the first one if it is empty, if it is, use the second one
+			if (!empty($object->{$title})) {
+				$post_data['post_title'] = $object->{$title};
 			}
-			else {
-				$post_data['post_title'] .= $object->{$title}.' ';
+            else {
+				$post_data['post_title'] = $object->{$postTitle[1]};
 			}
 		}
-		// Removing the last space
-		$post_data['post_title'] = rtrim($post_data['post_title']);
+        else {
+			$postTitle = explode(';', $databaseKey['post_title']);
+			$processedTitles = [];
 
-		# Post Content
+            # Loop through the titles and check if they are empty, if they are, skip them
+			foreach ($postTitle as $title) {
+				$objectTitle = $object->{$title} ?? '';
+
+                # Check if the title is uppercase, if it is, make it lowercase
+				if (!empty($objectTitle)) {
+					if ($objectTitle == strtoupper($objectTitle)) {
+						$objectTitle = ucfirst(strtolower($objectTitle));
+					}
+					$processedTitles[] = $objectTitle;
+				}
+			}
+
+			$post_data['post_title'] = implode(' ', $processedTitles);
+		}
+
 		$post_data['post_content'] = $object->{$databaseKey['post_content']} ?? '';
 
 		return $post_data;
@@ -871,12 +890,13 @@ class OGOffers {
         foreach ($mediaObjects as $mediaObject) {
             // ======== Declaring Variables ========
             # Mapping the data
-            $mediaObject = $OGMapping->mapMetaData($postTypeName, $mediaObject, $databaseKeysMedia['mapping']);
+            $mediaObject = $OGMapping->mapMetaData($postTypeName, $mediaObject, ($databaseKeysMedia['mapping'] ?? []));
 
 	        $mediaQuery = new WP_Query([
                 'post_type' => 'attachment',
                 'meta_key' => $databaseKeysMedia['mediaName'],
                 'meta_value' => $mediaObject->{$databaseKeysMedia['mediaName']},
+                'posts_per_page' => -1,
                 'post_status' => 'any',
             ]);
             $mediaExists = $mediaQuery->have_posts();
@@ -902,7 +922,7 @@ class OGOffers {
 	            'post_mime_type' => $post_mime_type,
             ];
             $post_meta = [
-                '_wp_attached_file' => '/'.$media_url,
+                '_wp_attached_file' => $media_url,
                 'file_url' => $media_url,
                 '_wp_attachment_metadata' => '',
                 'ObjectCode' => $OGobject->{$databaseKey['objectCode']},
@@ -944,6 +964,7 @@ class OGOffers {
             }
         }
     }
+
     function createPost($postTypeName, $OGobject, $databaseKey, $parentPostID='') {
         // ============ Declaring Variables ===========
         # Classes
@@ -1000,25 +1021,26 @@ class OGOffers {
 			update_post_meta($postID, $key, $value);
 		}
 	}
-
-	function deleteUnneededPosts($postTypeName, $databaseKeysObject, $objectIDs) {
+	function deleteUnneededPosts($postTypeName, $databaseKeysObject, $objectIDs, $type=''): void {
 		// ======== Declaring Variables ========
 		# Variables
 		$posts = new WP_Query([
 			'post_type' => $postTypeName,
 			'posts_per_page' => -1,
-            'post_status' => 'any'
+            'post_status' => 'any',
+            'meta_key' => 'type',
+            'meta_value' => $type
 		]);
 		// ======== Start of Function ========
 		# Getting all the post IDs from the meta data
 		foreach ($posts->posts as $post) {
 			// ==== Declaring Variables ====
 			# Getting the post ID
-			$postID = $post->{$databaseKeysObject['ID']};
+			$postTiara = $post->{$databaseKeysObject['ID']};
 
 			// ==== Rest of loop ====
 			# Checking if the post is in the database
-			if (!in_array($postID, $objectIDs)) {
+			if (!in_array($postTiara, $objectIDs)) {
 				# Delete the post
 				wp_delete_post($post->ID, true);
 
@@ -1027,21 +1049,162 @@ class OGOffers {
 					'post_type' => $postTypeName,
 					'posts_per_page' => -1,
 					'post_parent' => $post->ID,
+                    'post_status' => 'any',
 				]));
 				foreach ($childPosts->posts as $childPost) {
 					wp_delete_post($childPost->ID, true);
+
+					# Deleting every post with this as parent post
+					$childchildPosts = new WP_Query(([
+						'post_type' => $postTypeName,
+						'posts_per_page' => -1,
+						'post_parent' => $post->ID,
+						'post_status' => 'any',
+					]));
+					foreach ($childchildPosts->posts as $childchildPost) {
+						wp_delete_post($childchildPost->ID, true);
+					}
 				}
-				print('Deleted post: ' . $post->ID . '<br>');
+				echo('Deleted post: ' . $post->ID . '<br>');
 			}
 		}
 	}
+
+	function checkBouwnummersPosts($postTypeName, $parentPostID, $OGBouwtype, $databaseKeys) {
+        // ======== Declaring Variables ========
+        # Classes
+        global $wpdb;
+        $OGMapping = new OGMapping();
+
+        # Variables
+        $OGBouwtypeID = $OGBouwtype->id;
+        $objectIDs = [];
+
+        $OGBouwnummers = $wpdb->get_results("SELECT * FROM {$databaseKeys[2]['tableName']} WHERE {$databaseKeys[2]['id_bouwtypes']} = {$OGBouwtypeID}");
+
+        // ======== Start of Function ========
+        # Looping through the bouwnummers
+        foreach ($OGBouwnummers as $OGBouwnummer) {
+            # Checking if this OG bouwnummer is valid and if not just skip it.
+            if ( isset( $OGBouwnummer->{$databaseKeys[2]['ObjectStatus_database']} ) and $OGBouwnummer->{$databaseKeys[2]['ObjectStatus_database']} == '' ) {
+                continue;
+            }
+
+            // ======== Declaring Variables ========
+            # Variables
+            $OGBouwnummer = $OGMapping->mapMetaData($postTypeName, $OGBouwnummer, ($databaseKeys[2]['mapping'] ?? []));
+            # Post - Bouwnummer
+	        $postData = new WP_Query([
+		        'post_type' => $postTypeName,
+		        'meta_key' => $databaseKeys[2]['ID'],
+		        'meta_value' => $OGBouwtype->{$databaseKeys[2]['ID']},
+		        'post_parent' => $parentPostID,
+		        'posts_per_page' => -1,
+		        'post_status' => 'any'
+	        ]);
+            $bouwNummerExisted = $postData->have_posts();
+
+            if ($bouwNummerExisted) {
+                $postID = $postData->post->ID;
+	            $dateUpdatedPost = $postData->post->{$databaseKeys[2]['datum_gewijzigd']} ?? $postData->post->{$databaseKeys[2]['datum_toegevoegd']};
+            }
+
+            # Database - Bouwnummer
+            $dateUpdatedDatabase = $OGBouwnummer->{$databaseKeys[2]['datum_gewijzigd']} ?? $OGBouwnummer->{$databaseKeys[2]['datum_toegevoegd']};
+
+            // ======== Rest of loop ========
+            # Checking if post exists
+            if ($bouwNummerExisted) {
+                // Checking if the bouwtype is updated
+                if ($dateUpdatedPost != $dateUpdatedDatabase) {
+                    $this->updatePost($postTypeName, $postID, $OGBouwnummer, $databaseKeys[2], $parentPostID);
+                }
+            }
+            else {
+                // Creating the post
+                $postID = $this->createPost($postTypeName, $OGBouwnummer, $databaseKeys[2], $parentPostID);
+                echo("Created bouwnummer: {$postID}<br>");
+            }
+
+            # Adding the post ID to the array
+            $objectIDs[] = $OGBouwnummer->{$databaseKeys[2]['ID']};
+        }
+
+        // Returning the objectIDs
+        return $objectIDs;
+	}
+    function checkBouwtypesPosts($postTypeName, $parentPostID, $OGProject, $databaseKeys) {
+        // ======== Declaring Variables ========
+        # Classes
+        global $wpdb;
+	    $OGMapping = new OGMapping();
+
+        # Variables
+        $OGProjectID = $OGProject->id;
+        $objectIDs = [];
+        $bouwnummerIds = [];
+
+        $OGBouwtypes = $wpdb->get_results("SELECT * FROM {$databaseKeys[1]['tableName']} WHERE {$databaseKeys[1]['id_projecten']} = {$OGProjectID}");
+        // ======== Start of Function ========
+        # Looping through the bouwtypes
+        foreach ($OGBouwtypes as $OGBouwtype) {
+	        # Checking if this OG bouwtype is valid and if not just skip it.
+	        if ( isset( $OGBouwtype->{$databaseKeys[1]['ObjectStatus_database']} ) and $OGBouwtype->{$databaseKeys[1]['ObjectStatus_database']} == '' ) {
+		        continue;
+	        }
+
+            // ======== Declaring Variables ========
+            $OGBouwtype = $OGMapping->mapMetaData($postTypeName, $OGBouwtype, ($databaseKeys[1]['mapping'] ?? []));
+	        # Post - Bouwtype
+            $postData = new WP_Query([
+                'post_type' => $postTypeName,
+                'meta_key' => $databaseKeys[1]['ID'],
+                'meta_value' => $OGBouwtype->{$databaseKeys[1]['ID']},
+	            'post_parent' => $parentPostID,
+                'posts_per_page' => -1,
+                'post_status' => 'any'
+            ]);
+            $bouwTypeExisted = $postData->have_posts();
+
+            if ($bouwTypeExisted) {
+                $postID = $postData->post->ID;
+                $dateUpdatedPost = $postData->post->{$databaseKeys[1]['datum_gewijzigd']} ?? $postData->post->{$databaseKeys[1]['datum_toegevoegd']};
+            }
+
+            # Database - Bouwtype
+            $dateUpdatedObject = $OGBouwtype->{$databaseKeys[1]['datum_gewijzigd']} ?? $OGBouwtype->{$databaseKeys[1]['datum_toegevoegd']};
+            // ======== Rest of loop ========
+            # Checking if the post exists
+            if ($bouwTypeExisted) {
+                // Checking if the post is updated
+                if ($dateUpdatedPost != $dateUpdatedObject) {
+	                // Updating/overwriting the post
+	                echo('Updating post: ' . $postID); br(); br();
+                    $this->updatePost($postTypeName, $postID, $OGBouwtype, $databaseKeys[1], $parentPostID);
+                }
+            }
+            else {
+                // Creating the post
+	            $postID = $this->createPost($postTypeName, $OGBouwtype, $databaseKeys[1], $parentPostID);
+                echo('Created bouwtype: ' . $postID . '<br>');
+            }
+
+            # Adding the postID to the array
+            $objectIDs = array_merge($objectIDs, [$OGBouwtype->{$databaseKeys[1]['ID']}]);
+            # Checking the children (bouwnummers)
+            $bouwnummerIds = array_merge($bouwnummerIds, $this->checkBouwnummersPosts($postTypeName, $postID, $OGBouwtype, $databaseKeys));
+        }
+
+        # Returning the objectIDs
+        return [$objectIDs, $bouwnummerIds];
+    }
     function checkNieuwbouwPosts($postTypeName, $databaseKeys) {
         # ============ Declaring Variables ============
         # Classes
         global $wpdb;
         $OGMapping = new OGMapping();
         # Variables
-	    $objectIDs = [];
+	    $projectIds = [];
 	    $OGProjects = $wpdb->get_results("SELECT * FROM {$databaseKeys[0]['tableName']}");
 	    # Removing every null out of the objects so Wordpress won't get crazy.
 	    foreach ($OGProjects as $key => $object) {
@@ -1053,7 +1216,7 @@ class OGOffers {
 	    }
 
 	    # ============ Start of Function ============
-        # Looping through the objects
+        # ==== Looping through the objects ====
         foreach ($OGProjects as $OGProject) {
 	        # Checking if this OG project is valid and if not just skip it.
 	        if (isset($OGProject->{$databaseKeys[0]['ObjectStatus_database']}) AND $OGProject->{$databaseKeys[0]['ObjectStatus_database']} == '') {
@@ -1062,47 +1225,57 @@ class OGOffers {
 
             // ======== Declaring Variables ========
 	        # Remapping the object
-	        $OGProject = $OGMapping->mapMetaData($postTypeName, $OGProject, $databaseKeys[0]['mapping']);
-
+	        $OGProject = $OGMapping->mapMetaData($postTypeName, $OGProject, ($databaseKeys[0]['mapping'] ?? []));
             # Post - Project
             $postData = new WP_Query([
 	            'post_type' => $postTypeName,
 	            'meta_key' => $databaseKeys[0]['ID'],
 	            'meta_value' => $OGProject->{$databaseKeys[0]['ID']},
+	            'posts_per_page' => -1,
+	            'post_status' => 'any',
             ]);
             $projectExisted = $postData->have_posts();
+
+	        if ($projectExisted) {
+		        $postID = $postData->post->ID;
+		        $dateUpdatedPost = $postData->post->{$databaseKeys[0]['datum_gewijzigd']} ?? $postData->post->{$databaseKeys[0]['datum_toegevoegd']};
+	        }
             # Database - Project
 	        $dateUpdatedObject = $OGProject->{$databaseKeys[0]['datum_gewijzigd']} ?? $OGProject->{$databaseKeys[0]['datum_toegevoegd']};
 
-            if ($projectExisted) {
-                $postID = $postData->post->ID;
-                $dateUpdatedPost = $postData->post->{$databaseKeys[0]['datum_gewijzigd']} ?? $postData->post->{$databaseKeys[0]['datum_toegevoegd']};
-            }
             // ======== Start of Function ========
             # Checking if the project exists
 	        if ($projectExisted) {
 		        // Checking if the post is updated
 		        if ($dateUpdatedPost != $dateUpdatedObject) {
 			        // Updating/overwriting the post
-			        print('Updating post: ' . $postData->post->ID . '<br>');
-			        $this->updatePost($postTypeName, $postData->post->ID, $OGProject, $databaseKeys[0]);
+			        echo('Updating post: ' . $postID . '<br>');
+			        $this->updatePost($postTypeName, $postID, $OGProject, $databaseKeys[0]);
 		        }
 	        }
             else {
 	            // Creating the post
 	            $postID = $this->createPost($postTypeName, $OGProject, $databaseKeys[0]);
-	            print('Creating PostID: '.$postID.'<br>');
+	            echo('Created project: '.$postID.'<br>');
             }
 
             # Adding the postID to the array
-            $objectIDs[] = $OGProject->{$databaseKeys[0]['ID']};
-
-            # Checking the childposts
-
+            $projectIds[] = $OGProject->{$databaseKeys[0]['ID']};
+            # Checking the child-posts
+            $arrayIds = $this->checkBouwtypesPosts($postTypeName, $postID, $OGProject, $databaseKeys);
         }
-	    $this->deleteUnneededPosts($postTypeName, $databaseKeys[0], $objectIDs);
-        print('klaar met nieuwbouw');
+        # ==== Deleting the unneeded posts ====
+        # Projects
+	    $this->deleteUnneededPosts($postTypeName, $databaseKeys[0], $projectIds, $databaseKeys[0]['type']);
+
+        # Bouwtypes
+	    $this->deleteUnneededPosts($postTypeName, $databaseKeys[1], $arrayIds[0], $databaseKeys[1]['type']);
+
+        # Bouwnummers
+        $this->deleteUnneededPosts($postTypeName, $databaseKeys[2], $arrayIds[1], $databaseKeys[2]['type']);
+        echo('Nieuwbouw Projecten klaar!<br>');
     }
+
 	function checkNormalPosts($postTypeName, $OGobjects, $databaseKey): void {
         // ============ Declaring Variables ============
         # Classes
@@ -1117,12 +1290,14 @@ class OGOffers {
             // ======== Declaring Variables ========
 	        # ==== Variables ====
             # Remapping the object
-	        $OGobject = $OGMapping->mapMetaData($postTypeName, $OGobject, $databaseKey['mapping']);
+	        $OGobject = $OGMapping->mapMetaData($postTypeName, $OGobject, ($databaseKey['mapping'] ?? []));
 
             $postData = new WP_Query([
 	            'post_type' => $postTypeName,
 	            'meta_key' => $databaseKey['ID'],
 	            'meta_value' => $OGobject->{$databaseKey['ID']},
+	            'posts_per_page' => -1,
+	            'post_status' => 'any',
             ]);
             $postExists = $postData->have_posts();
 
@@ -1171,6 +1346,12 @@ class OGOffers {
 		// ============ Start of Function ============
 		foreach ($postTypeData as $postTypeName => $postTypeArray) {
 //			if ($postTypeName == 'wonen' or $postTypeName == 'bedrijven') {continue;}
+
+//            // Setting the default "upload" directory for the post type so that the file url won't be gay
+//            $uploadDir = wp_upload_dir();
+//            $uploadDir = $uploadDir['baseurl'] . '/';
+//            update_option('upload_url_path', $uploadDir);
+
 			// ======== Declaring Variables ========
 			$boolIsNieuwbouw = !isset($postTypeArray['database_tables']['object']);
 
