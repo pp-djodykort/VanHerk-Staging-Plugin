@@ -12,8 +12,8 @@
   </component>
   <component name="PhpIncludePathManager">
     <include_path>
-      <path value="$PROJECT_DIR$/../../../../../../../../../xampp/php/PEAR" />
-      <path value="$PROJECT_DIR$/../../.." />
+      <path value="$PROJECT_DIR$/../../../../../xampp/php/PEAR" />
+      <path value="D:/Onedrives/OneDrive - VISTA college/Vista College/Leerjaar 2/htdocs/wordpress-stage1" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />
