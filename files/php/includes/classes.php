@@ -112,6 +112,7 @@ class OGPostTypeData {
 						# Normal fields
 						'ID' => '_id',                              // Mapped value
 						'post_title' => 'straat;huisnummer;plaats', // Mapped value
+                        'post_name' => 'straat-huisnummer-plaats',  // Mapped value
 						'post_content' => 'aanbiedingstekst',       // Mapped value
 						'datum_gewijzigd' => 'ObjectUpdated',       // Mapped value
 						'datum_toegevoegd' => 'ObjectDate',         // Mapped value
@@ -182,6 +183,7 @@ class OGPostTypeData {
 						# Normal fields
 						'ID' => '_id',
 						'post_title' => 'straat;huisnummer;plaats', // Mapped value
+						'post_name' => 'straat-huisnummer-plaats',  // Mapped value
 						'post_content' => 'aanbiedingstekst',       // Mapped value
 						'datum_gewijzigd' => 'ObjectUpdated',       // Mapped value
 						'datum_toegevoegd' => 'ObjectDate',         // Mapped value
@@ -251,6 +253,7 @@ class OGPostTypeData {
 						# Normal fields
 						'ID' => '_id',                                                              // Mapped value
 						'post_title' => 'project_ProjectDetails_Projectnaam',                       // Mapped value if needed
+						'post_name' => 'project_ProjectDetails_Projectnaam',                        // Mapped value
 						'post_content' => 'project_ProjectDetails_Presentatie_Aanbiedingstekst',    // Mapped value
 						'ObjectStatus_database' => 'project_ProjectDetails_Status_ObjectStatus',    // Mapped value
 						'datum_gewijzigd' => 'ObjectUpdated',                                       // Mapped value
