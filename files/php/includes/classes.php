@@ -1215,17 +1215,13 @@ class OGOffers {
 			# Variables
 			$OGBouwnummer = $OGMapping->mapMetaData($OGBouwnummer, ($databaseKeys[2]['mapping'] ?? []), $locationCodes);
 			# Post - Bouwnummer
-            pre($parentPostID);
-            pre($databaseKeys[2]['ID']);
-            pre($OGBouwtype->{$databaseKeys[2]['ID']});
-
 			$postData = new WP_Query([
 				'post_type' => $postTypeName,
 				'meta_key' => $databaseKeys[2]['ID'],
-				'meta_value' => $OGBouwtype->{$databaseKeys[2]['ID']},
+				'meta_value' => $OGBouwnummer->{$databaseKeys[2]['ID']},
 				'post_parent' => $parentPostID,
 				'posts_per_page' => -1,
-				'post_status' => 'any'
+				'post_status' => 'any',
 			]);
 			$bouwNummerExisted = $postData->have_posts();
 
@@ -1441,7 +1437,7 @@ class OGOffers {
 				// Checking if the post is updated
 				if ($dateUpdatedPost != $dateUpdatedObject) {
 					// Echo the fact that this is happening
-					echo("Updating {$postTypeName} object: {$postData->post->ID}<br/>}");
+					echo("Updating {$postTypeName} object: {$postData->post->ID}<br/>");
 					// Updating/overwriting the post
 					$this->updatePost($postTypeName, $postData->post->ID, $OGobject, $databaseKey);
 				}
@@ -1469,14 +1465,12 @@ class OGOffers {
 		# Variables
 		$beginTime = time();
 		$postTypeData = $postTypeData->customPostTypes();
-        $postTypeNeeded = '';
 		// ============ Start of Function ============
         # ==== Checking all the post types ====
 		foreach ($postTypeData as $postTypeName => $postTypeArray) {
 //			if ($postTypeName == 'wonen' or $postTypeName == 'bedrijven') {continue;}
 
 			// ======== Declaring Variables ========
-			$postTypeNeeded = $postTypeName;
 			$boolIsNieuwbouw = !isset($postTypeArray['database_tables']['object']);
 
 			if ($boolIsNieuwbouw) {
@@ -1514,10 +1508,6 @@ class OGOffers {
 				}
 			}
 		}
-
-        // ==== Checking all the media ====
-        $this->checkMedia($postTypeData[$postTypeNeeded]['database_tables']['object']['media']);
-
 
 		// Putting in the database how much memory it ended up gusing maximum from bytes to megabytes
 		$maxMemoryUsage = (memory_get_peak_usage(true) / 1024 / 1024);
