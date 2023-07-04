@@ -20,9 +20,6 @@ register_uninstall_hook(__FILE__, 'OGUninstallPlugin');
 
 // ============ Classes initialisation ============
 $OGPostTypes = new OGPostTypes();
-$menuItems = new OGMenu();
-//$OGOffers = new OGOffers();
 
 // ============ Start ============
-adminNotice('success', getLoadTime());
-adminNotice('cock', get_site_url());
+//adminNotice('success', getLoadTime());

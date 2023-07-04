@@ -810,8 +810,11 @@ class OGPostTypes {
 
 	// ==== Start of Class ====
 	function __construct() {
+        # Creating the post types
 		add_action('init', array($this, 'createPostTypes'));
-		add_action('init', array($this, 'checkMigrationPostTypes'));
+
+        # Checking the post migration
+//		add_action('init', array($this, 'checkMigrationPostTypes'));
 	}
 
 	// =========== Functions ===========
@@ -1520,72 +1523,5 @@ class OGOffers {
 			'datetime' => date('Y-m-d H:i:s', $beginTime),
 			'duration' => round((time() - $beginTime) / 60, 2)
 		]);
-	}
-}
-
-class OGLookieLookie {
-	function __construct() {
-//        add_action('init', [$this, 'lookieBouwtypes']);
-//        add_action('init', [$this, 'lookieBouwnummers']);
-	}
-
-	function lookieBouwtypes(): void {
-		// ================ Declaring Variables ================
-		# Classes
-		global $wpdb;
-
-		# Variables
-		$arraya = [];
-		// Connecting to database
-		$db = new $wpdb('admin_og-wp', '6OMaa8GpC', 'admin_vhbackup', 'orel.pixelplus.nl');
-
-		$results = $db->get_results("SELECT ID FROM `wp_posts` WHERE `post_parent` = 0 AND `post_type` = 'nieuwbouw'");
-
-		// ================ Start of Function ================
-		foreach ($results as $result) {
-			$id = $result->ID;
-
-			$results2 = $db->get_results("SELECT ID FROM `wp_posts` WHERE `post_parent` = $id AND `post_type` = 'nieuwbouw'");
-
-			foreach($results2 as $result2) {
-				$id       = $result2->ID;
-				$arraya[] = $id;
-			}
-		}
-		# Getting all the DISTINCT meta_keys from the post meta of all those records with post_id
-		$results3 = $db->get_results("SELECT DISTINCT meta_key, meta_value FROM `wp_postmeta` WHERE `post_id` IN (" . implode(',', $arraya) . ")");
-		pre($results3);
-	}
-
-	function lookieBouwnummers(): void {
-		// ================ Declaring Variables ================
-		# Classes
-		global $wpdb;
-
-		# Variables
-		$arraya = [];
-		// Connecting to database
-		$db = new $wpdb('admin_og-wp', '6OMaa8GpC', 'admin_vhbackup', 'orel.pixelplus.nl');
-
-		$results = $db->get_results("SELECT ID FROM `wp_posts` WHERE `post_parent` = 0 AND `post_type` = 'nieuwbouw'");
-
-		// ================ Start of Function ================
-		foreach ($results as $result) {
-			$id = $result->ID;
-
-			$results2 = $db->get_results("SELECT ID FROM `wp_posts` WHERE `post_parent` = $id AND `post_type` = 'nieuwbouw'");
-
-			foreach($results2 as $result2) {
-				$id = $result2->ID;
-				$results3 = $db->get_results("SELECT ID FROM `wp_posts` WHERE `post_parent` = $id AND `post_type` = 'nieuwbouw'");
-				foreach($results3 as $result3) {
-					$id       = $result3->ID;
-					$arraya[] = $id;
-				}
-			}
-		}
-		# Getting all the DISTINCT meta_keys from the post meta of all those records with post_id
-		$results4 = $db->get_results("SELECT DISTINCT meta_key, meta_value FROM `wp_postmeta` WHERE `post_id` IN (" . implode(',', $arraya) . ")");
-		pre($results4);
 	}
 }
