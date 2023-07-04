@@ -6,10 +6,16 @@ $lockFile = __DIR__. '/lockfiles/syncOffers.lock';
 $accessToken = [ 'accessToken', '5375636B4D79416363657373546F6B656E' ];
 $overrideToken = [ 'overrideToken', '5375636B4D794C6F636B46696C65546F6B656E' ];
 
-# GET Arguments
-$accessAllowed = isset($_GET[$accessToken[0]]) && (($_GET[$accessToken[0]] == $accessToken[1] ?? false));
-$overrideActivated = isset($_GET[$overrideToken[0]]) && (($_GET[$overrideToken[0]] == $overrideToken[1] ?? false));
-print($overrideActivated);
+# GET/$argv Arguments
+if (php_sapi_name() == 'cli') {
+	$accessAllowed = isset($argv[1]) && (($argv[1] == $accessToken[1] ?? false));
+	$overrideActivated = isset($argv[2]) && (($argv[2] == $overrideToken[1] ?? false));
+}
+else {
+	$accessAllowed = isset($_GET[$accessToken[0]]) && (($_GET[$accessToken[0]] == $accessToken[1] ?? false));
+	$overrideActivated = isset($_GET[$overrideToken[0]]) && (($_GET[$overrideToken[0]] == $overrideToken[1] ?? false));
+}
+
 // ======== Start Program ========
 if (!$accessAllowed) {
 	die("Access not allowed.");

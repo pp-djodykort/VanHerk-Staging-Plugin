@@ -94,6 +94,7 @@ class OGPostTypeData {
 							)
 						)
 					),
+                    'rewrite' => false,             // Mapped value
 					'public' => true,
 					'seperate_table' => true,
 					'has_archive' => true,
@@ -168,6 +169,7 @@ class OGPostTypeData {
 						'menu_name' => 'BOG'
 					),
 					'public' => true,
+					'rewrite' => false,             // Mapped value
 					'has_archive' => true,
 					'publicly_queryable' => true,
 					'query_var' => true,
@@ -239,6 +241,7 @@ class OGPostTypeData {
 						'menu_name' => 'Nieuwbouw'
 					),
 					'public' => true,
+					'rewrite' => false,             // Mapped value
 					'has_archive' => true,
 					'publicly_queryable' => true,
 					'query_var' => true,
