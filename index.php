@@ -19,10 +19,9 @@ register_deactivation_hook(__FILE__, array($activateAndDeactivate, 'deactivate')
 register_uninstall_hook(__FILE__, 'OGUninstallPlugin');
 
 // ============ Classes initialisation ============
+$OGPostTypes = new OGPostTypes();
 $menuItems = new OGMenu();
-$cpt = new OGPostTypes();
 //$OGOffers = new OGOffers();
-//$test = new OGLookieLookie();
 
 // ============ Start ============
 adminNotice('success', getLoadTime());
