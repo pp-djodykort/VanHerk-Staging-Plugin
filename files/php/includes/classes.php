@@ -197,6 +197,7 @@ class OGPostTypeData {
 							# TableName
 							'tableName' => 'tbl_OG_media',
 							# Normal fields
+                            'folderRedirect' => 'bog',              // Mapped value CAN BE EMPTY
 							'search_id' => 'id_OG_bog',
 							'mediaID' => 'media_Id',                // Mapped value
 							'datum_gewijzigd' => 'MediaUpdated',
@@ -387,47 +388,6 @@ class OGPostTypeData {
 		);
 	}
 }
-class WPColorScheme {
-	// ================ Declaring Variables ================
-	public array $mainColors = array(
-		'light' => 3,
-		'modern' => 1,
-		'coffee' => 2,
-		'ectoplasm' => 2,
-		'midnight' => 3,
-		'ocean' => 2,
-		'sunrise' => 2,
-		'80s-kid' => 1,
-		'adderley' => 2,
-		'aubergine' => 3,
-		'blue' => 1,
-		'contrast-blue' => 0,
-		'cruise' => 3,
-		'flat' => 2,
-		'kirk' => 0,
-		'lawn' => 3,
-		'modern-evergreen' => 3,
-		'primary' => 3,
-		'seashore' => 3,
-		'vinyard' => 3
-	);
-
-	// ================ Begin of Class ================
-	function returnColor(): string
-	{
-		// ======== Declaring Variables ========
-		global $_wp_admin_css_colors;
-		$WPColorScheme = get_user_option('admin_color');
-
-		// ======== Start of Function ========
-		foreach ($this->mainColors as $key => $value) {
-			if ($key == $WPColorScheme) {
-				return $_wp_admin_css_colors[$WPColorScheme]->colors[$this->mainColors[$key]];
-			}
-		}
-		return $_wp_admin_css_colors['fresh']->colors[2];
-	}
-}
 class OGSettingsData {
 	// ============ Declare Variables ============
 	// Strings
@@ -573,6 +533,32 @@ class OGMapping {
 					}
 					# Step 5: Putting it in the mapping table as a default value
 					$mappingTable[$mappingKey]['pixelplus'] = "'".rtrim($strResult, ' -')."'";
+				}
+
+				// ==== Checking the statuses ====
+				if (str_starts_with($mappingValue['pixelplus'], '$') and str_ends_with($mappingValue['pixelplus'], '$')) {
+					// ==== Declaring Variables ====
+                    # Vars
+                    $strTrimmedKey = trim($mappingValue['pixelplus'], '$');
+                    $arrExplodedKey = explode('|', $strTrimmedKey);
+
+                    // ==== Start of Function ====
+                    // if has more than 1 key
+                    if (count($arrExplodedKey) > 1) {
+                        # Step 1: Checking the value
+                        if (isset($OGTableRecord->{$arrExplodedKey[0]}) and !empty($OGTableRecord->{$arrExplodedKey[0]})) {
+                            switch (strtolower($arrExplodedKey[1])) {
+                                case 'sold': {
+                                    // ==== Start of Function ====
+                                    # If the value is verkocht then put it to 1
+                                    if (strtolower($OGTableRecord->{$arrExplodedKey[0]}) == 'verkocht') {
+                                        $mappingTable[$mappingKey]['pixelplus'] = '1';
+                                    }
+                                }
+                            }
+                        }
+                    }
+
 				}
 
 				// ==== Checking arrays ====
@@ -976,6 +962,7 @@ class OGOffers {
 		$OGMapping = new OGMapping();
 
 		# Variables
+        $postTypeName = $databaseKeysMedia['folderRedirect'] ?? $postTypeName;
 		$databaseKeysMedia = $databaseKey['media'];
 		$mime_type_map = [
 			'jpg' => 'image/jpeg',
@@ -1469,6 +1456,7 @@ class OGOffers {
 		$postTypeData = new OGPostTypeData();
 
 		# Variables
+        date_default_timezone_set('Europe/Amsterdam');
 		$beginTime = time();
 		$postTypeData = $postTypeData->customPostTypes();
 		// ============ Start of Function ============
