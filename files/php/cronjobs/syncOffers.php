@@ -1,7 +1,8 @@
 <?php
 // ============ Access allowed & Lock file ============
 // ======== Declaring Variables ========
-$lockFile = __DIR__. '/lockfiles/syncOffers.lock';
+# Plus this variable: '/lockfiles/syncOffers.lock' do it the right way so it can be used on every os
+$lockFile = __DIR__. DIRECTORY_SEPARATOR. 'lockfiles'. DIRECTORY_SEPARATOR. 'syncOffers.lock';
 # Variables
 $accessToken = [ 'accessToken', '5375636B4D79416363657373546F6B656E' ];
 $overrideToken = [ 'overrideToken', '5375636B4D794C6F636B46696C65546F6B656E' ];
@@ -26,6 +27,12 @@ if (file_exists($lockFile)) {
 	# Check if an override is activated or not
 	if (!$overrideActivated) {
 		die("The cronjob currently already is running.");
+	}
+}
+else {
+	# Check if the directory exists
+	if (!file_exists(dirname($lockFile))) {
+		mkdir(dirname($lockFile), 0777, true);
 	}
 }
 touch($lockFile);
