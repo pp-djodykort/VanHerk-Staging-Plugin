@@ -457,7 +457,7 @@ class OGMapping {
 	}
 
 	// ================ Begin of Class ================
-	function mapMetaData($OGTableRecord, $databaseKeysMapping, $locationCodes=[]) {
+	function mapMetaData($OGTableRecord, $databaseKeysMapping, $locationCodes=[], $databaseKeys=[]) {
 		if (!empty($databaseKeysMapping)) {
 			// ======== Declaring Variables ========
 			# Classes
@@ -628,6 +628,32 @@ class OGMapping {
 						}
 					}
 				}
+
+                // ==== Checking the total buildnumbers/buildtypes ====
+				if (str_starts_with($mappingValue['pixelplus'], '^') and str_ends_with($mappingValue['pixelplus'], '^')) {
+                    // ==== Declaring Variables ====
+                    # Vars
+                    $strTrimmedKey = trim($mappingValue['pixelplus'], '^');
+
+                    // ==== Start of Function ====
+					if (!empty($strTrimmedKey)) {
+                        if ($strTrimmedKey == 'bouwtypes') {
+                            # Step 1: Getting the count of bouwtypes in the database
+                            $count = $wpdb->get_var("SELECT COUNT(*) FROM {$databaseKeys[1]['tableName']}");
+
+                            # Step 2: Adding the count to the OG Record
+                            $OGTableRecord->{$mappingTable[$mappingKey]['vanherk']} = $count;
+                        }
+                        if ($strTrimmedKey == 'bouwnummers') {
+                            # Step 1: Getting the count of bouwnummers in the database
+                            $count = $wpdb->get_var("SELECT COUNT(*) FROM {$databaseKeys[2]['tableName']}");
+
+                            # Step 2: Adding the count to the OG Record
+                            $OGTableRecord->{$mappingTable[$mappingKey]['vanherk']} = $count;
+                        }
+                    }
+
+                }
 			}
 			# Looping through the mapping table with the updated values
 			foreach ($mappingTable as $mappingValue) {
@@ -1206,7 +1232,7 @@ class OGOffers {
 
 			// ======== Declaring Variables ========
 			# Variables
-			$OGBouwnummer = $OGMapping->mapMetaData($OGBouwnummer, ($databaseKeys[2]['mapping'] ?? []), $locationCodes);
+			$OGBouwnummer = $OGMapping->mapMetaData($OGBouwnummer, ($databaseKeys[2]['mapping'] ?? []), $locationCodes, $databaseKeys);
 			# Post - Bouwnummer
 			$postData = new WP_Query([
 				'post_type' => $postTypeName,
@@ -1271,7 +1297,7 @@ class OGOffers {
 			}
 
 			// ======== Declaring Variables ========
-			$OGBouwtype = $OGMapping->mapMetaData($OGBouwtype, ($databaseKeys[1]['mapping'] ?? []), $locationCodes);
+			$OGBouwtype = $OGMapping->mapMetaData($OGBouwtype, ($databaseKeys[1]['mapping'] ?? []), $locationCodes, $databaseKeys);
 			# Post - Bouwtype
 			$postData = new WP_Query([
 				'post_type' => $postTypeName,
@@ -1343,7 +1369,7 @@ class OGOffers {
 
 			// ======== Declaring Variables ========
 			# Remapping the object
-			$OGProject = $OGMapping->mapMetaData($OGProject, ($databaseKeys[0]['mapping'] ?? []), $locationCodes);
+			$OGProject = $OGMapping->mapMetaData($OGProject, ($databaseKeys[0]['mapping'] ?? []), $locationCodes, $databaseKeys);
 			# Post - Project
 			$postData = new WP_Query([
 				'post_type' => $postTypeName,
