@@ -547,12 +547,25 @@ class OGMapping {
                     if (count($arrExplodedKey) > 1) {
                         # Step 1: Checking the value
                         if (isset($OGTableRecord->{$arrExplodedKey[0]}) and !empty($OGTableRecord->{$arrExplodedKey[0]})) {
-                            switch (strtolower($arrExplodedKey[1])) {
+                            switch (strtolower(end($arrExplodedKey))) {
                                 case 'sold': {
                                     // ==== Start of Function ====
                                     # If the value is verkocht then put it to 1
                                     if (strtolower($OGTableRecord->{$arrExplodedKey[0]}) == 'verkocht') {
                                         $mappingTable[$mappingKey]['pixelplus'] = '1';
+                                    }
+                                    else {
+                                        # Ignore the value
+                                        unset($mappingTable[$mappingKey]);
+                                    }
+                                }
+                                case 'ObjectKoop': {
+                                    if (strtolower($OGTableRecord->{$arrExplodedKey[0]}) == 'vrij op naam') {
+                                        $mappingTable[$mappingKey]['pixelplus'] = '1';
+                                    }
+                                    else {
+                                        # Put the value back in
+                                        $mappingTable[$mappingKey]['pixelplus'] = $OGTableRecord->{$arrExplodedKey[1]};
                                     }
                                 }
                             }
@@ -639,14 +652,14 @@ class OGMapping {
 					if (!empty($strTrimmedKey)) {
                         if ($strTrimmedKey == 'bouwtypes') {
                             # Step 1: Getting the count of bouwtypes in the database
-                            $count = $wpdb->get_var("SELECT COUNT(*) FROM {$databaseKeys[1]['tableName']}");
+                            $count = $wpdb->get_var("SELECT COUNT(*) FROM {$databaseKeys[1]['tableName']} WHERE {$databaseKeys[0]['media']['search_id']} = {$OGTableRecord->{$databaseKeys[0]['media']['search_id']}}");
 
                             # Step 2: Adding the count to the OG Record
                             $OGTableRecord->{$mappingTable[$mappingKey]['vanherk']} = $count;
                         }
                         if ($strTrimmedKey == 'bouwnummers') {
                             # Step 1: Getting the count of bouwnummers in the database
-                            $count = $wpdb->get_var("SELECT COUNT(*) FROM {$databaseKeys[2]['tableName']}");
+                            $count = $wpdb->get_var("SELECT COUNT(*) FROM {$databaseKeys[2]['tableName']} WHERE {$databaseKeys[0]['media']['search_id']} = {$OGTableRecord->{$databaseKeys[0]['media']['search_id']}}");
 
                             # Step 2: Adding the count to the OG Record
                             $OGTableRecord->{$mappingTable[$mappingKey]['vanherk']} = $count;

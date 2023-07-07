@@ -13,6 +13,7 @@ $meta_keys1 = [];
 $meta_keys2 = [];
 
 $bouwTypeIds = [];
+$bouwNummerIds = [];
 
 # Limits
 // Changing the execution time and memory limit
@@ -23,15 +24,23 @@ ini_set( 'memory_limit', '-1' );
 global $wpdb;
 
 // ============ Start of Program ============
-$Ids = $wpdb->get_results("SELECT ID FROM wp_posts WHERE post_type = 'nieuwbouw' AND post_parent = 0", ARRAY_A);
+$Ids = $wpdb->get_results("SELECT ID FROM `wp_posts` WHERE post_type = 'nieuwbouw' AND post_parent = 0", ARRAY_A);
 
 foreach($Ids as $id) {
-	$bouwTypeIds[] = $wpdb->get_results("SELECT ID FROM wp_posts WHERE post_type = 'nieuwbouw' AND post_parent = ".$id['ID'], ARRAY_A);
+	$bouwTypeIds[] = $wpdb->get_results("SELECT ID FROM `wp_posts` WHERE post_type = 'nieuwbouw' AND post_parent = ".$id['ID'], ARRAY_A);
 }
-# Make it a single array
-$bouwTypeIds = array_merge(...$bouwTypeIds);
 
-foreach ($bouwTypeIds as $id) {
+# Get the bouwnummers
+foreach ($bouwTypeIds as $bouwTypeId) {
+	foreach ($bouwTypeId as $id) {
+		$bouwNummerIds[] = $wpdb->get_results("SELECT ID FROM `wp_posts` WHERE post_type = 'nieuwbouw' AND post_parent = ".$id['ID'], ARRAY_A);
+	}
+}
+
+# Make it a single array
+$bouwNummerIds = array_merge(...$bouwNummerIds);
+
+foreach ($bouwNummerIds as $id) {
 	$meta_keys1[] = get_post_meta($id['ID']);
 }
 
@@ -42,4 +51,8 @@ foreach($meta_keys1 as $meta_key) {
 	$meta_keys2[] = array_keys($meta_key);
 }
 
-pre($meta_keys2);
+foreach($meta_keys2 as $meta_key) {
+	foreach($meta_key as $key) {
+		print($key.'<br>');
+	}
+}
