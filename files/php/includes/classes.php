@@ -1001,8 +1001,8 @@ class OGOffers {
 		$OGMapping = new OGMapping();
 
 		# Variables
-        $postTypeName = $databaseKeysMedia['folderRedirect'] ?? $postTypeName;
 		$databaseKeysMedia = $databaseKey['media'];
+        $postTypeName = $databaseKeysMedia['folderRedirect'] ?? $postTypeName;
 		$mime_type_map = [
 			'jpg' => 'image/jpeg',
 			'png' => 'image/png',
