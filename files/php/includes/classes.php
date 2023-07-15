@@ -258,10 +258,10 @@ class OGPostTypeData {
 						'tableName' => 'tbl_OG_nieuwbouw_projecten',
 						# Normal fields
 						'ID' => '_id',                                                              // Mapped value
-						'post_title' => 'project_ProjectDetails_Projectnaam',                       // Mapped value if needed
-						'post_name' => 'project_ProjectDetails_Projectnaam',                        // Mapped value
-						'post_content' => 'project_ProjectDetails_Presentatie_Aanbiedingstekst',    // Mapped value
-						'ObjectStatus_database' => 'project_ProjectDetails_Status_ObjectStatus',    // Mapped value
+						'post_title' => 'sold_title',                       // Mapped value if needed
+						'post_name' => 'sold_title',                        // Mapped value
+						'post_content' => 'omschrijving',    // Mapped value
+						'ObjectStatus_database' => 'status',    // Mapped value
 						'datum_gewijzigd' => 'ObjectUpdated',                                       // Mapped value
 						'datum_toegevoegd' => 'ObjectDate',                                         // Mapped value
 						'objectCode' => 'ObjectCode',                                               // Mapped value
@@ -302,9 +302,9 @@ class OGPostTypeData {
 						# Normal fields
 						'ID' => '_id',                                                              // Mapped value
 						'id_projecten' => 'id_OG_nieuwbouw_projecten',                              // Mapped value
-						'post_title' => 'bouwType_BouwTypeDetails_Naam|ObjectCode',                 // Mapped value if needed | is for seperating values (OR statement)
-						'post_name' => 'bouwType_BouwTypeDetails_Naam|ObjectCode',                  // Mapped value
-						'post_content' => 'bouwType_BouwTypeDetails_Aanbiedingstekst',              // Mapped value
+						'post_title' => 'bouwType_BouwTypeDetails_Naam|ObjectCode',                    // Mapped value if needed | is for seperating values (OR statement)
+						'post_name' => 'bouwType_BouwTypeDetails_Naam|ObjectCode',                     // Mapped value
+						'post_content' => 'omschrijving',                           // Mapped value
 						'ObjectStatus_database' => 'bouwType_BouwTypeDetails_Status_ObjectStatus',  // Mapped value
 						'datum_gewijzigd' => 'ObjectUpdated',                                       // Mapped value
 						'datum_toegevoegd' => 'ObjectDate',                                         // Mapped value
@@ -346,8 +346,8 @@ class OGPostTypeData {
 						# Normal fields
 						'ID' => '_id',                                                                          // Mapped value
 						'id_bouwtypes' => 'id_OG_nieuwbouw_bouwTypes',                                          // Mapped value
-						'post_title' => 'Adres_Straatnaam;Adres_Huisnummer;Adres_Postcode;Adres_Woonplaats;Adres_HuisnummerToevoeging;ObjectCode',    // Mapped value if needed | is for seperating values (OR statement)
-						'post_name' => 'Adres_Straatnaam-Adres_Huisnummer-Adres_Postcode-Adres_Woonplaats-Adres_HuisnummerToevoeging-ObjectCode',  // Mapped value
+						'post_title' => 'straat;huisnummer;postcode;plaats;huisnummertoevoeging;ObjectCode',    // Mapped value if needed | is for seperating values (OR statement)
+						'post_name' => 'straat-huisnummer-postcode-plaats-huisnummertoevoeging-ObjectCode',  // Mapped value
                         'post_content' => 'Aanbiedingstekst',                                                   // Mapped value
 						'ObjectStatus_database' => 'bouwNummer_ObjectCode',                                     // Mapped value
 						'datum_gewijzigd' => 'ObjectUpdated',                                                   // Mapped value
@@ -565,7 +565,7 @@ class OGMapping {
                                     }
                                     else {
                                         # Put the value back in
-                                        $mappingTable[$mappingKey]['pixelplus'] = $OGTableRecord->{$arrExplodedKey[1]};
+                                        $mappingTable[$mappingKey]['pixelplus'] = $OGTableRecord->{$arrExplodedKey[0]};
                                     }
                                 }
                             }
@@ -650,22 +650,51 @@ class OGMapping {
 
                     // ==== Start of Function ====
 					if (!empty($strTrimmedKey)) {
+						// ==== Declaring Variables ====
+						# Vars
+						$projectID = $OGTableRecord->{$databaseKeys[0]['media']['search_id']} ?? 'id';
+
+                        // ==== Start of Function ====
                         if ($strTrimmedKey == 'bouwtypes') {
+
                             # Step 1: Getting the count of bouwtypes in the database
-                            $count = $wpdb->get_var("SELECT COUNT(*) FROM {$databaseKeys[1]['tableName']} WHERE {$databaseKeys[0]['media']['search_id']} = {$OGTableRecord->{$databaseKeys[0]['media']['search_id']}}");
+                            $count = $wpdb->get_var("SELECT COUNT(*) FROM {$databaseKeys[1]['tableName']} WHERE {$databaseKeys[0]['media']['search_id']} = {$projectID}");
 
                             # Step 2: Adding the count to the OG Record
                             $OGTableRecord->{$mappingTable[$mappingKey]['vanherk']} = $count;
                         }
                         if ($strTrimmedKey == 'bouwnummers') {
                             # Step 1: Getting the count of bouwnummers in the database
-                            $count = $wpdb->get_var("SELECT COUNT(*) FROM {$databaseKeys[2]['tableName']} WHERE {$databaseKeys[0]['media']['search_id']} = {$OGTableRecord->{$databaseKeys[0]['media']['search_id']}}");
+                            $count = $wpdb->get_var("SELECT COUNT(*) FROM {$databaseKeys[2]['tableName']} WHERE {$databaseKeys[0]['media']['search_id']} = {$projectID}");
 
                             # Step 2: Adding the count to the OG Record
                             $OGTableRecord->{$mappingTable[$mappingKey]['vanherk']} = $count;
                         }
                     }
+                }
 
+                // ==== Checking the objecttype ====
+                if (str_starts_with($mappingValue['pixelplus'], '*') and str_ends_with($mappingValue['pixelplus'], '*')) {
+                    // ==== Declaring Variables ====
+                    # Vars
+                    $strTrimmedKey = trim($mappingValue['pixelplus'], '*');
+                    $arrExplodedKey = explode('|', $strTrimmedKey);
+
+                    // ==== Start of Function ====
+                    if (!empty($arrExplodedKey)) {
+                        # Step 1: Checking if the key isset in the OG Record
+                        if (isset($OGTableRecord->{$arrExplodedKey[0]}) and !empty($OGTableRecord->{$arrExplodedKey[0]})) {
+                            # Step 2: Set it as the value
+                            $OGTableRecord->{$mappingTable[$mappingKey]['vanherk']} = $arrExplodedKey[1];
+
+                            # Step 3: Removing the old key
+                            unset($OGTableRecord->{$arrExplodedKey[0]});
+                        }
+                        else {
+                            # Setting the value to the second key
+                            $OGTableRecord->{$mappingTable[$mappingKey]['vanherk']} = end($arrExplodedKey);
+                        }
+                    }
                 }
 			}
 			# Looping through the mapping table with the updated values
@@ -1383,6 +1412,7 @@ class OGOffers {
 			// ======== Declaring Variables ========
 			# Remapping the object
 			$OGProject = $OGMapping->mapMetaData($OGProject, ($databaseKeys[0]['mapping'] ?? []), $locationCodes, $databaseKeys);
+
 			# Post - Project
 			$postData = new WP_Query([
 				'post_type' => $postTypeName,
