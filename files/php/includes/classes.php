@@ -302,8 +302,8 @@ class OGPostTypeData {
 						# Normal fields
 						'ID' => '_id',                                                              // Mapped value
 						'id_projecten' => 'id_OG_nieuwbouw_projecten',                              // Mapped value
-						'post_title' => 'bouwType_BouwTypeDetails_Naam|ObjectCode',                    // Mapped value if needed | is for seperating values (OR statement)
-						'post_name' => 'bouwType_BouwTypeDetails_Naam|ObjectCode',                     // Mapped value
+						'post_title' => 'bouwType_BouwTypeDetails_Naam|ObjectCode',                  // Mapped value if needed | is for seperating values (OR statement)
+						'post_name' => 'bouwType_BouwTypeDetails_Naam|ObjectCode',                   // Mapped value
 						'post_content' => 'omschrijving',                           // Mapped value
 						'ObjectStatus_database' => 'bouwType_BouwTypeDetails_Status_ObjectStatus',  // Mapped value
 						'datum_gewijzigd' => 'ObjectUpdated',                                       // Mapped value
@@ -652,11 +652,10 @@ class OGMapping {
 					if (!empty($strTrimmedKey)) {
 						// ==== Declaring Variables ====
 						# Vars
-						$projectID = $OGTableRecord->{$databaseKeys[0]['media']['search_id']} ?? 'id';
+						$projectID = $OGTableRecord->{$databaseKeys[0]['media']['search_id']} ?? $OGTableRecord->id ?? '0';
 
                         // ==== Start of Function ====
                         if ($strTrimmedKey == 'bouwtypes') {
-
                             # Step 1: Getting the count of bouwtypes in the database
                             $count = $wpdb->get_var("SELECT COUNT(*) FROM {$databaseKeys[1]['tableName']} WHERE {$databaseKeys[0]['media']['search_id']} = {$projectID}");
 
@@ -965,14 +964,21 @@ class OGOffers {
             $arrPostNames = explode('-', $databaseKey['post_name']);
             $arrProcessedPostNames = [];
 
-	        foreach ($arrPostNames as $postName) {
-		        # Check the first one if it is empty, if it is, go to the next one
-		        if (empty($object->{$postName} ?? '')) {continue;}
-                $arrProcessedPostNames[] = strtolower($object->{$postName});
+            # Loop through the post names and check if they are empty, if they are, skip them
+            foreach ($arrPostNames as $postName) {
+                $objectPostName = $object->{$postName} ?? '';
+
+                # Check if the post name is uppercase, if it is, make it lowercase
+                if (!empty($objectPostName)) {
+                    if ($objectPostName == strtoupper($objectPostName)) {
+                        $objectPostName = ucfirst(strtolower($objectPostName));
+                    }
+                    $arrProcessedPostNames[] = $objectPostName;
+                }
             }
             $post_data['post_name'] = implode('-', $arrProcessedPostNames);
         }
-        if (str_contains($databaseKey['post_name'], '|')) {
+        elseif (str_contains($databaseKey['post_name'], '|')) {
             $postTitle = explode('|', $databaseKey['post_name']);
             $title = $postTitle[0];
 
@@ -984,9 +990,13 @@ class OGOffers {
                 $post_data['post_name'] = strtolower($object->{$postTitle[1]});
             }
         }
+        else {
+	        $post_data['post_name'] = strtolower($object->{$databaseKey['post_name'] ?? ''});
+        }
 
+		$post_data['post_name'] = sanitize_title($post_data['post_name']);
 
-        # ======== Post Content ========
+		# ======== Post Content ========
 		$post_data['post_content'] = $object->{$databaseKey['post_content']} ?? '';
 
         # Return the post_data
