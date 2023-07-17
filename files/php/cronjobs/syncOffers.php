@@ -4,8 +4,8 @@
 # Plus this variable: '/lockfiles/syncOffers.lock' do it the right way so it can be used on every os
 $lockFile = __DIR__. DIRECTORY_SEPARATOR. 'lockfiles'. DIRECTORY_SEPARATOR. 'syncOffers.lock';
 # Variables
-$accessToken = [ 'accessToken', '5375636B4D79416363657373546F6B656E' ];
-$overrideToken = [ 'overrideToken', '5375636B4D794C6F636B46696C65546F6B656E' ];
+$accessToken = ['accessToken', '5375636B4D79416363657373546F6B656E'];
+$overrideToken = ['overrideToken', '5375636B4D794C6F636B46696C65546F6B656E'];
 
 # GET/$argv Arguments
 if (php_sapi_name() == 'cli') {
@@ -60,3 +60,4 @@ $ogOffers = new OGOffers();
 
 // ============ End of Program ============
 unlink($lockFile);
+?>

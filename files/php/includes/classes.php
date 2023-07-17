@@ -60,6 +60,7 @@ class OGPostTypeData {
 	function customPostTypes(): array {
 		// ===== Start of Construct =====
 		return array(
+			// Post Type 1
 			/* post_type */'wonen' => array(
 				'post_type_args' => array(
 					'labels' => array(
@@ -124,10 +125,11 @@ class OGPostTypeData {
 							# TableName
 							'tableName' => 'tbl_OG_media',
 							# Normal fields
-                            'mediaID' => 'media_Id',                // Mapped value
-							'search_id' => 'id_OG_wonen',           // Mapped value
-							'datum_gewijzigd' => 'MediaUpdated',    // Mapped value
+							'folderRedirect' => '',                 // Mapped value CAN BE EMPTY
+                            'mediaID' => 'media_Id',                // NON Mapped value
+							'search_id' => 'id_OG_wonen',           // NON Mapped value
 							'datum_toegevoegd' => 'ObjectDate',     // Mapped value
+							'datum_gewijzigd' => 'MediaUpdated',    // Mapped value
 							'mediaName' => 'MediaName',             // Mapped value
 							'media_Groep' => 'MediaType',           // Mapped value
 
@@ -138,16 +140,10 @@ class OGPostTypeData {
 							),
 
 							# Only if mapping is neccesary uncomment the following lines and fill in the correct table name
-							'mapping' => array(
-								# TableName
-								'tableName' => 'og_mappingmedia',
-							)
+							'mapping' => array(/* TableName */ 'tableName' => 'og_mappingmedia')
 						),
 						# Only if mapping is neccesary uncomment the following lines and fill in the correct table name
-						'mapping' => array(
-							# TableName
-							'tableName' => 'og_mappingwonen',
-						)
+						'mapping' => array( /* TableName */ 'tableName' => 'og_mappingwonen')
 					),
 				)
 			),
@@ -188,8 +184,8 @@ class OGPostTypeData {
 						'post_title' => 'straat;huisnummer;huisnummertoevoeging;plaats', // Mapped value
 						'post_name' => 'straat-huisnummer-huisnummertoevoeging-plaats',  // Mapped value
 						'post_content' => 'aanbiedingstekst',       // Mapped value
+						'datum_toegevoegd' => 'ObjectDate',     // Mapped value
 						'datum_gewijzigd' => 'ObjectUpdated',       // Mapped value
-						'datum_toegevoegd' => 'ObjectDate',         // Mapped value
 						'objectCode' => 'ObjectCode',               // Mapped value
 
 						# Post fields
@@ -198,11 +194,12 @@ class OGPostTypeData {
 							'tableName' => 'tbl_OG_media',
 							# Normal fields
                             'folderRedirect' => 'bog',              // Mapped value CAN BE EMPTY
-							'search_id' => 'id_OG_bog',
-							'mediaID' => 'media_Id',                // Mapped value
-							'datum_gewijzigd' => 'MediaUpdated',
-							'mediaName' => 'MediaName',
-							'media_Groep' => 'MediaType',
+							'search_id' => 'id_OG_bog',             // NON Mapped value
+							'mediaID' => 'media_Id',                // NON Mapped value
+							'datum_toegevoegd' => 'ObjectDate',     // Mapped value
+							'datum_gewijzigd' => 'MediaUpdated',    // Mapped value
+							'mediaName' => 'MediaName',             // Mapped value
+							'media_Groep' => 'MediaType',           // Mapped value
 
 							# Post fields
 							'object_keys' => array(
@@ -211,16 +208,10 @@ class OGPostTypeData {
 							),
 
 							# Only if mapping is neccesary uncomment the following lines and fill in the correct table name
-							'mapping' => array(
-								# TableName
-								'tableName' => 'og_mappingmedia',
-							)
+							'mapping' => array(/* TableName */ 'tableName' => 'og_mappingmedia')
 						),
 						# Only if mapping is neccesary uncomment the following lines and fill in the correct table name
-						'mapping' => array(
-							# TableName
-							'tableName' => 'og_mappingbedrijven',
-						),
+						'mapping' => array(/* TableName */ 'tableName' => 'og_mappingbedrijven')
 					),
 				)
 			),
@@ -272,11 +263,13 @@ class OGPostTypeData {
 							# TableName
 							'tableName' => 'tbl_OG_media',
 							# Normal fields
-							'search_id' => 'id_OG_nieuwbouw_projecten',
-							'mediaID' => 'media_Id',                // Mapped value
-							'datum_gewijzigd' => 'MediaUpdated',
-							'mediaName' => 'MediaName',
-							'media_Groep' => 'MediaType',
+							'folderRedirect' => '',                         // Mapped value CAN BE EMPTY
+							'search_id' => 'id_OG_nieuwbouw_projecten',     // NON Mapped value
+							'mediaID' => 'media_Id',                        // NON Mapped value
+							'datum_toegevoegd' => 'ObjectDate',             // Mapped value
+							'datum_gewijzigd' => 'MediaUpdated',            // Mapped value
+							'mediaName' => 'MediaName',                     // Mapped value
+							'media_Groep' => 'MediaType',                   // Mapped value
 
 							# Post fields
 							'object_keys' => array(
@@ -285,16 +278,10 @@ class OGPostTypeData {
 							),
 
 							# Only if mapping is neccesary uncomment the following lines and fill in the correct table name
-							'mapping' => array(
-								# TableName
-								'tableName' => 'og_mappingmedia',
-							)
+							'mapping' => array(/* TableName */ 'tableName' => 'og_mappingmedia')
 						),
 						# Only if mapping is neccesary uncomment the following lines and fill in the correct table name
-						'mapping' => array(
-							# TableName
-							'tableName' => 'og_mappingnieuwbouwprojecten',
-						)
+						'mapping' => array(/* TableName */ 'tableName' => 'og_mappingnieuwbouwprojecten')
 					),
 					'bouwTypes' => array(
 						# TableName
@@ -302,9 +289,9 @@ class OGPostTypeData {
 						# Normal fields
 						'ID' => '_id',                                                              // Mapped value
 						'id_projecten' => 'id_OG_nieuwbouw_projecten',                              // Mapped value
-						'post_title' => 'bouwType_BouwTypeDetails_Naam|ObjectCode',                  // Mapped value if needed | is for seperating values (OR statement)
-						'post_name' => 'bouwType_BouwTypeDetails_Naam|ObjectCode',                   // Mapped value
-						'post_content' => 'omschrijving',                           // Mapped value
+						'post_title' => 'bouwType_BouwTypeDetails_Naam|ObjectCode',                 // Mapped value if needed | is for seperating values (OR statement)
+						'post_name' => 'bouwType_BouwTypeDetails_Naam|ObjectCode',                  // Mapped value
+						'post_content' => 'omschrijving',                                           // Mapped value
 						'ObjectStatus_database' => 'bouwType_BouwTypeDetails_Status_ObjectStatus',  // Mapped value
 						'datum_gewijzigd' => 'ObjectUpdated',                                       // Mapped value
 						'datum_toegevoegd' => 'ObjectDate',                                         // Mapped value
@@ -316,11 +303,13 @@ class OGPostTypeData {
 							# TableName
 							'tableName' => 'tbl_OG_media',
 							# Normal fields
-							'search_id' => 'id_OG_nieuwbouw_bouwtypes',
-							'mediaID' => 'media_Id',                // Mapped value
-							'datum_gewijzigd' => 'MediaUpdated',
-							'mediaName' => 'MediaName',
-							'media_Groep' => 'MediaType',
+							'folderRedirect' => '',                         // Mapped value CAN BE EMPTY
+							'search_id' => 'id_OG_nieuwbouw_bouwtypes',     // NON Mapped value
+							'mediaID' => 'media_Id',                        // NON Mapped value
+							'datum_toegevoegd' => 'ObjectDate',             // Mapped value
+							'datum_gewijzigd' => 'MediaUpdated',            // Mapped value
+							'mediaName' => 'MediaName',                     // Mapped value
+							'media_Groep' => 'MediaType',                   // Mapped value
 
 							# Post fields
 							'object_keys' => array(
@@ -329,16 +318,10 @@ class OGPostTypeData {
 							),
 
 							# Only if mapping is neccesary uncomment the following lines and fill in the correct table name
-							'mapping' => array(
-								# TableName
-								'tableName' => 'og_mappingmedia',
-							)
+							'mapping' => array(/* TableName */ 'tableName' => 'og_mappingmedia')
 						),
 						# Only if mapping is neccesary uncomment the following lines and fill in the correct table name
-						'mapping' => array(
-							# TableName
-							'tableName' => 'og_mappingnieuwbouwbouwtypes',
-						)
+						'mapping' => array(/* TableName */ 'tableName' => 'og_mappingnieuwbouwbouwtypes')
 					),
 					'bouwNummers' => array(
 						# TableName
@@ -360,11 +343,13 @@ class OGPostTypeData {
 							# TableName
 							'tableName' => 'tbl_OG_media',
 							# Normal fields
-							'search_id' => 'id_OG_nieuwbouw_bouwnummers',
-							'mediaID' => 'media_Id',                // Mapped value
-							'datum_gewijzigd' => 'MediaUpdated',
-							'mediaName' => 'MediaName',
-							'media_Groep' => 'MediaType',
+							'folderRedirect' => '',                         // Mapped value CAN BE EMPTY
+							'search_id' => 'id_OG_nieuwbouw_bouwnummers',   // NON Mapped value
+							'mediaID' => 'media_Id',                        // NON Mapped value
+							'datum_toegevoegd' => 'ObjectDate',             // Mapped value
+							'datum_gewijzigd' => 'MediaUpdated',            // Mapped value
+							'mediaName' => 'MediaName',                     // Mapped value
+							'media_Groep' => 'MediaType',                   // Mapped value
 
 							# Post fields
 							'object_keys' => array(
@@ -373,15 +358,10 @@ class OGPostTypeData {
 							),
 
 							# Only if mapping is neccesary uncomment the following lines and fill in the correct table name
-							'mapping' => array(
-								# TableName
-								'tableName' => 'og_mappingmedia',
-							)
+							'mapping' => array(/* TableName */ 'tableName' => 'og_mappingmedia')
 						),
 						# Only if mapping is neccesary uncomment the following lines and fill in the correct table name
-						'mapping' => array(
-							'tableName' => 'og_mappingnieuwbouwbouwnummers',
-						)
+						'mapping' => array(/* TableName */ 'tableName' => 'og_mappingnieuwbouwbouwnummers')
 					),
 				)
 			)
@@ -457,6 +437,17 @@ class OGMapping {
 	}
 
 	// ================ Begin of Class ================
+	function cleanupObjects($OGTableRecord): mixed {
+		foreach ($OGTableRecord as $OGTableRecordKey => $OGTableRecordValue) {
+			# Check if the value is empty and if so remove the whole key from the OBJECT
+			if ($OGTableRecordValue == '' or $OGTableRecordValue == NULL or $OGTableRecordValue == 'NULL') {
+				unset($OGTableRecord->{$OGTableRecordKey});
+			}
+		}
+
+		# Return the cleaned up OBJECT
+		return $OGTableRecord;
+	}
 	function mapMetaData($OGTableRecord, $databaseKeysMapping, $locationCodes=[], $databaseKeys=[]) {
 		if (!empty($databaseKeysMapping)) {
 			// ======== Declaring Variables ========
@@ -468,12 +459,7 @@ class OGMapping {
 			// ========================= Start of Function =========================
 			// ================ Cleaning the Tables/Records ================
 			# Getting rid of all the useless and empty values in the OBJECT
-			foreach ($OGTableRecord as $OGTableRecordKey => $OGTableRecordValue) {
-				# Check if the value is empty and if so remove the whole key from the OBJECT
-				if ($OGTableRecordValue == '' or $OGTableRecordValue == NULL or $OGTableRecordValue == 'NULL') {
-					unset($OGTableRecord->{$OGTableRecordKey});
-				}
-			}
+			$OGTableRecord = $this->cleanupObjects($OGTableRecord);
 			# Getting rid of all the useless and empty values in the MAPPING TABLE
 			foreach ($mappingTable as $mappingKey => $mappingTableValue) {
 				# Check if the value is empty and if so remove the whole key from the OBJECT
@@ -725,6 +711,11 @@ class OGMapping {
 					}
 				}
 			}
+		}
+		else {
+			// ================ Cleaning the Tables/Records ================
+			# Getting rid of all the useless and empty values in the OBJECT
+			$OGTableRecord = $this->cleanupObjects($OGTableRecord);
 		}
 
 		// ================ Returning the Object ================
@@ -1041,7 +1032,7 @@ class OGOffers {
 
 		# Variables
 		$databaseKeysMedia = $databaseKey['media'];
-        $postTypeName = $databaseKeysMedia['folderRedirect'] ?? $postTypeName;
+		$postTypeName = !empty($databaseKeysMedia['folderRedirect']) ? $databaseKeysMedia['folderRedirect'] : $postTypeName;
 		$mime_type_map = [
 			'jpg' => 'image/jpeg',
 			'png' => 'image/png',
