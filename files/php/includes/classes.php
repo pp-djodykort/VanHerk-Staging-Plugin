@@ -303,7 +303,7 @@ class OGPostTypeData {
 							# TableName
 							'tableName' => 'tbl_OG_media',
 							# Normal fields
-							'folderRedirect' => '',                         // Mapped value CAN BE EMPTY
+							'folderRedirect' => 'bouwtypen',                         // Mapped value CAN BE EMPTY
 							'search_id' => 'id_OG_nieuwbouw_bouwtypes',     // NON Mapped value
 							'mediaID' => 'media_Id',                        // NON Mapped value
 							'datum_toegevoegd' => 'ObjectDate',             // Mapped value
@@ -343,7 +343,7 @@ class OGPostTypeData {
 							# TableName
 							'tableName' => 'tbl_OG_media',
 							# Normal fields
-							'folderRedirect' => '',                         // Mapped value CAN BE EMPTY
+							'folderRedirect' => 'bouwnummers',                         // Mapped value CAN BE EMPTY
 							'search_id' => 'id_OG_nieuwbouw_bouwnummers',   // NON Mapped value
 							'mediaID' => 'media_Id',                        // NON Mapped value
 							'datum_toegevoegd' => 'ObjectDate',             // Mapped value
