@@ -537,27 +537,25 @@ class OGMapping {
                                 case 'sold': {
                                     // ==== Start of Function ====
                                     # If the value is verkocht then put it to 1
-                                    if (strtolower($OGTableRecord->{$arrExplodedKey[0]}) == 'verkocht') {
-                                        $mappingTable[$mappingKey]['pixelplus'] = '1';
-                                    }
-                                    else {
-                                        # Ignore the value
-                                        unset($mappingTable[$mappingKey]);
-                                    }
+	                                $mappingTable[$mappingKey]['pixelplus'] = (strtolower($OGTableRecord->{$arrExplodedKey[0]} == 'verkocht') ? "'1'" : "'0'");
+                                    break;
                                 }
-                                case 'ObjectKoop': {
-                                    if (strtolower($OGTableRecord->{$arrExplodedKey[0]}) == 'vrij op naam') {
-                                        $mappingTable[$mappingKey]['pixelplus'] = '1';
-                                    }
-                                    else {
-                                        # Put the value back in
-                                        $mappingTable[$mappingKey]['pixelplus'] = $OGTableRecord->{$arrExplodedKey[0]};
-                                    }
+                                case 'prijs': {
+                                    // ==== Start of Function ====
+                                    $mappingTable[$mappingKey]['pixelplus'] = ($OGTableRecord->{$arrExplodedKey[0]} > 0) ? "'1'" : "'0'";
+                                    break;
+                                }
+                                case 'onderhoudswaardering': {
+                                    # Remove all weird characters, change to space then to lowercase and then UpperCase the first letter
+                                    $mappingTable[$mappingKey]['pixelplus'] = "'".ucfirst(strtolower(preg_replace('/[^A-Za-z0-9\-]/', ' ', $OGTableRecord->{$arrExplodedKey[0]})))."'";
+
+                                    # Removing the old record
+                                    unset($OGTableRecord->{$arrExplodedKey[0]});
+                                    break;
                                 }
                             }
                         }
                     }
-
 				}
 
 				// ==== Checking arrays ====
@@ -1037,11 +1035,11 @@ class OGOffers {
 			'jpg' => 'image/jpeg',
 			'png' => 'image/png',
 			'pdf' => 'application/pdf',
+            'mp4' => 'video/mp4',
 		];
-        $mime_type_map2 = [
-            'Video' => 'video/mp4',
-            'Connected_partner' => 'application/unknown',
-        ];
+		$mime_type_map2 = [
+			'Video' => 'video/mp4',
+		];
 		$guid_url = get_site_url();
 
 		$mediaObjects = $wpdb->get_results("SELECT * FROM `{$databaseKeysMedia['tableName']}` WHERE `{$databaseKeysMedia['search_id']}` = $OGobject->id");
@@ -1064,25 +1062,26 @@ class OGOffers {
 			$objectLastUpdated = $OGobject->{$databaseKey['datum_gewijzigd']} ?? $OGobject->{$databaseKey['datum_toegevoegd']};
 
 			# Vars
+			$boolIsConnectedPartner = $mediaObject->{$databaseKeysMedia['media_Groep']} == 'Connected_partner';
 			$post_mime_type = $mime_type_map[$mediaObject->{'bestands_extensie'}] ?? $mime_type_map2[$mediaObject->{$databaseKeysMedia['media_Groep']}] ?? 'unknown';
 			$media_url = "og_media/{$postTypeName}_{$OGobject->{$databaseKeysMedia['object_keys']['objectVestiging']}}_{$OGobject->{$databaseKeysMedia['object_keys']['objectTiara']}}/{$OGobject->{$databaseKeysMedia['object_keys']['objectTiara']}}_{$mediaObject->{$databaseKey['ID']}}.$mediaObject->bestands_extensie";
 			$post_data = [
 				'post_content' => '',
-				'post_title' => "{$mediaObject->{$databaseKey['ID']}}-{$mediaObject->bestandsnaam}",
+				'post_title' => "{$mediaObject->{$databaseKey['ID']}}-$mediaObject->bestandsnaam",
 				'post_excerpt' => strtoupper($mediaObject->{$databaseKeysMedia['media_Groep']}),
 				'post_status' => 'inherit',
 				'comment_status' => 'open',
 				'ping_status' => 'closed',
-				'post_name' => "{$mediaObject->{$databaseKey['ID']}}-{$mediaObject->bestandsnaam}",
+				'post_name' => "{$mediaObject->{$databaseKey['ID']}}-$mediaObject->bestandsnaam",
 				'post_parent' => $postID,
-				'guid' => "{$guid_url}/$media_url",
+				'guid' => $boolIsConnectedPartner ? $mediaObject->media_URL : "$guid_url/$media_url",
 				'menu_order' => $mediaObject->{'media_volgorde'},
 				'post_type' => 'attachment',
 				'post_mime_type' => $post_mime_type,
 			];
 			$post_meta = [
-				'_wp_attached_file' => $media_url,
-				'file_url' => $media_url,
+				'_wp_attached_file' => $boolIsConnectedPartner ? $mediaObject->media_URL : $media_url,
+				'file_url' => $boolIsConnectedPartner ? $mediaObject->media_URL : $media_url,
 				'_wp_attachment_metadata' => '',
 				'ObjectCode' => $OGobject->{$databaseKey['objectCode']},
 				'MediaType' => strtoupper($mediaObject->{$databaseKeysMedia['media_Groep']}),
