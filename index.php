@@ -7,6 +7,9 @@
  * Author: Pixelplus - Djody
  * Author URI: https://djody.nl/
 */
+if (!defined('ABSPATH')) {
+	die('No direct access allowed');
+}
 
 // ========= Imports =========
 include_once 'files/php/includes/classes.php';
