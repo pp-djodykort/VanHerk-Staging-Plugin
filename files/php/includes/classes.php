@@ -734,18 +734,17 @@ class OGMenu {
 	# ==== Functions ====
 	# This function is for adding the menu to the admin panel
 	function addMenu(): void {
-		// ======== Declaring Variables ========
-
 		// ======== Start of Function ========
-		add_menu_page(
-			'Pixelplus OG Plugin',
-			'Pixelplus OG Plugin',
-			'manage_options',
-			'pixelplus-og-plugin',
-			array($this, 'htmlMenu'),
-			'dashicons-admin-generic',
-			100
-		);
+		// add_menu_page(
+		//	'Pixelplus OG Plugin',
+		//	'Pixelplus OG Plugin',
+		//	'manage_options',
+		//	'pixelplus-og-plugin',
+		//	array($this, 'htmlMenu'),
+		//	'dashicons-admin-generic',
+		//	100
+		// );
+
 		// ==== Items OG Aanbod ====
 		// Menu Item: OG Aanbod Dashboard
 		add_menu_page(
@@ -756,19 +755,17 @@ class OGMenu {
 			array($this, 'HTMLOGAanbodDashboard'),
 			'dashicons-admin-multisite',
 			40);
-		// First sub-menu item name change
-		add_submenu_page(
-			'pixelplus-og-plugin-aanbod',
-			'Aanbod Dashboard',
-			'Dashboard',
-			'manage_options',
-			'pixelplus-og-plugin-aanbod',
-			array($this, 'HTMLOGAanbodDashboard'),
-			0
-		);
+
+		// add_submenu_page(
+		//	'pixelplus-og-plugin-aanbod',
+		//	'Aanbod Dashboard',
+		//	'Dashboard',
+		//	'manage_options',
+		//	'pixelplus-og-plugin-aanbod',
+		//	array($this, 'HTMLOGAanbodDashboard'),
+		//	0
+		// );
 	}
-
-
 
 	# ==== HTML ====
 	function htmlMenu(): void {
@@ -809,7 +806,6 @@ class OGMenu {
 	function HTMLOGAanbodDashboard(): void { htmlHeader('OG Aanbod Dashboard'); ?>
         <p>dingdong bishass</p>
 		<?php htmlFooter('OG Aanbod Dashboard');}
-
 }
 class OGTableMappingDisplay {
 	// ============ Constructor ============
@@ -870,7 +866,6 @@ class OGPostTypes {
 		$postTypeData = $postTypeData->customPostTypes();
 
 		// ==== Start of Function ====
-
 		// Create the OG Custom Post Types (if the user has access to it)
 		foreach($postTypeData as $postType => $postTypeArray) {
 			register_post_type($postType, $postTypeArray['post_type_args']);
@@ -901,7 +896,6 @@ class OGPostTypes {
 		}
 	}
 }
-
 class OGOffers {
 	// ================ Start of Class ================
 	function __construct() {
