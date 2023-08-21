@@ -270,6 +270,7 @@ class OGPostTypeData {
 							'datum_gewijzigd' => 'MediaUpdated',            // Mapped value
 							'mediaName' => 'MediaName',                     // Mapped value
 							'media_Groep' => 'MediaType',                   // Mapped value
+							'mediaTiaraID' => '',                           // Mapped value CAN BE EMPTY
 
 							# Post fields
 							'object_keys' => array(
@@ -310,6 +311,7 @@ class OGPostTypeData {
 							'datum_gewijzigd' => 'MediaUpdated',            // Mapped value
 							'mediaName' => 'MediaName',                     // Mapped value
 							'media_Groep' => 'MediaType',                   // Mapped value
+							'mediaTiaraID' => '',                           // Mapped value CAN BE EMPTY
 
 							# Post fields
 							'object_keys' => array(
@@ -350,6 +352,7 @@ class OGPostTypeData {
 							'datum_gewijzigd' => 'MediaUpdated',            // Mapped value
 							'mediaName' => 'MediaName',                     // Mapped value
 							'media_Groep' => 'MediaType',                   // Mapped value
+                            'mediaTiaraID' => '',                           // Mapped value CAN BE EMPTY
 
 							# Post fields
 							'object_keys' => array(
@@ -506,8 +509,15 @@ class OGMapping {
 					foreach($arrExplodedKey as $arrExplodedKeyValue) {
 						# Step 2: Check if the key even isset or empty in OG Record
 						if (isset($OGTableRecord->{$arrExplodedKeyValue}) and !empty($OGTableRecord->{$arrExplodedKeyValue})) {
-							# Step 3: Add the value to the result string
-							$strResult .= $OGTableRecord->{$arrExplodedKeyValue}.' ';
+							# Step 3: Checking
+                            if (str_starts_with($OGTableRecord->{$arrExplodedKeyValue}, '~') && str_ends_with($OGTableRecord->{$arrExplodedKeyValue}, '~')) {
+	                            # Step 4: Remove the ~ from the value and all the spaces. And then adding it to strResult
+	                            $strResult .= trim($OGTableRecord->{$arrExplodedKeyValue}, '~ ').' ';
+                            }
+                            else {
+                                # Step 4: Adding it to strResult
+                                $strResult .= $OGTableRecord->{$arrExplodedKeyValue}.' ';
+                            }
 						}
 					}
 					foreach($arrExplodedKeyMinus as $arrExplodedKeyValue) {
@@ -1024,12 +1034,13 @@ class OGOffers {
 
 		# Variables
 		$databaseKeysMedia = $databaseKey['media'];
+		$mediaTiaraIDName = !empty($databaseKeysMedia['mediaTiaraID']) ? $databaseKeysMedia['mediaTiaraID'] : $databaseKey['ID'];
 		$postTypeName = !empty($databaseKeysMedia['folderRedirect']) ? $databaseKeysMedia['folderRedirect'] : $postTypeName;
 		$mime_type_map = [
 			'jpg' => 'image/jpeg',
 			'png' => 'image/png',
 			'pdf' => 'application/pdf',
-            'mp4' => 'video/mp4',
+			'mp4' => 'video/mp4',
 		];
 		$mime_type_map2 = [
 			'Video' => 'video/mp4',
@@ -1056,17 +1067,18 @@ class OGOffers {
 			$objectLastUpdated = $OGobject->{$databaseKey['datum_gewijzigd']} ?? $OGobject->{$databaseKey['datum_toegevoegd']};
 
 			# Vars
+			$mediaTiaraID = $mediaObject->{$mediaTiaraIDName};
 			$boolIsConnectedPartner = $mediaObject->{$databaseKeysMedia['media_Groep']} == 'Connected_partner';
 			$post_mime_type = $mime_type_map[$mediaObject->{'bestands_extensie'}] ?? $mime_type_map2[$mediaObject->{$databaseKeysMedia['media_Groep']}] ?? 'unknown';
-			$media_url = "og_media/{$postTypeName}_{$OGobject->{$databaseKeysMedia['object_keys']['objectVestiging']}}_{$OGobject->{$databaseKeysMedia['object_keys']['objectTiara']}}/{$OGobject->{$databaseKeysMedia['object_keys']['objectTiara']}}_{$mediaObject->{$databaseKey['ID']}}.$mediaObject->bestands_extensie";
+			$media_url = "og_media/{$postTypeName}_{$OGobject->{$databaseKeysMedia['object_keys']['objectVestiging']}}_{$OGobject->{$databaseKeysMedia['object_keys']['objectTiara']}}/{$OGobject->{$databaseKeysMedia['object_keys']['objectTiara']}}_{$mediaTiaraID}.$mediaObject->bestands_extensie";
 			$post_data = [
 				'post_content' => '',
-				'post_title' => "{$mediaObject->{$databaseKey['ID']}}-$mediaObject->bestandsnaam",
+				'post_title' => "{$mediaObject->{$mediaTiaraIDName}}-$mediaObject->bestandsnaam",
 				'post_excerpt' => strtoupper($mediaObject->{$databaseKeysMedia['media_Groep']}),
 				'post_status' => 'inherit',
 				'comment_status' => 'open',
 				'ping_status' => 'closed',
-				'post_name' => "{$mediaObject->{$databaseKey['ID']}}-$mediaObject->bestandsnaam",
+				'post_name' => "{$mediaObject->{$mediaTiaraIDName}}-$mediaObject->bestandsnaam",
 				'post_parent' => $postID,
 				'guid' => $boolIsConnectedPartner ? $mediaObject->media_URL : "$guid_url/$media_url",
 				'menu_order' => $mediaObject->{'media_volgorde'},
@@ -1082,7 +1094,7 @@ class OGOffers {
 				'MediaName' => $mediaObject->{$databaseKeysMedia['mediaName']},
 				'MediaUpdated' => $mediaObject->{$databaseKeysMedia['datum_gewijzigd']},
 				'_wp_attachment_image_alt' => '',
-				'_id' => $mediaObject->{$databaseKey['ID']},
+				$mediaTiaraIDName => $mediaObject->{$mediaTiaraIDName},
 			];
 			// ======== Start of Function ========
 			# Checking if the media exists
