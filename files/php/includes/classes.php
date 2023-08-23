@@ -527,21 +527,26 @@ class OGMapping {
 					$arrExplodedKeyMinus = explode('-', $strTrimmedKey);
 					$strResult = '';
 
+                    # Bools
+                    $boolTrimSpaces = False;
+
 					// ==== Start of Function ====
 					# Step 1: Looping through all the keys
 					foreach($arrExplodedKey as $arrExplodedKeyValue) {
+                        # Step 2: Checking if there are any special character at the beginning and or end of the key
+                        if (str_starts_with($arrExplodedKeyValue, '~') and str_ends_with($arrExplodedKeyValue, '~')) {
+                            # Step 3: Remove the ~ from the value and all the spaces. And then adding it to strResult
+                            $boolTrimSpaces = True;
+
+                            # Removing the ~ from the value
+                            $arrExplodedKeyValue = trim($arrExplodedKeyValue, '~');
+                        }
+
 						# Step 2: Check if the key even isset or empty in OG Record
 						if (isset($OGTableRecord->{$arrExplodedKeyValue}) and !empty($OGTableRecord->{$arrExplodedKeyValue})) {
-							# Step 3: Checking
-                            if (str_starts_with($OGTableRecord->{$arrExplodedKeyValue}, '~') && str_ends_with($OGTableRecord->{$arrExplodedKeyValue}, '~')) {
-	                            # Step 4: Remove the ~ from the value and all the spaces. And then adding it to strResult
-	                            $strResult .= trim($OGTableRecord->{$arrExplodedKeyValue}, '~ ').' ';
-                            }
-                            else {
-                                # Step 4: Adding it to strResult
-                                $strResult .= $OGTableRecord->{$arrExplodedKeyValue}.' ';
-                            }
-						}
+							# Step 4: Adding it to strResult
+							$strResult .= $boolTrimSpaces ? str_replace(' ', '', $OGTableRecord->{$arrExplodedKeyValue}).' ' : $OGTableRecord->{$arrExplodedKeyValue}.' ';
+                        }
 					}
 					foreach($arrExplodedKeyMinus as $arrExplodedKeyValue) {
 						# Step 2: Check if the key even isset or empty in OG Record
