@@ -5,40 +5,51 @@ include_once("functions.php");
 // ==== Activation and Deactivation (Uninstallation is in the functions.php because it needs to be a static function) ====
 class OGActivationAndDeactivation {
 	// ======== Activation ========
-	function activate(): void {
-		$this->registerSettings();
-		$this->createCacheFiles();
+	static function activate(): void {
+		self::registerSettings();
+		self::createCacheFiles();
 	}
 
 	// ======== Deactivation ========
-	function deactivate(): void {
+	static function deactivate(): void {
 
 	}
 
+    // ======== Uninstall ========
+    static function uninstall(): void {
+	    // ================ Start of Function ================
+	    // ======== Deleting Settings/Options ========
+	    // Check which settings are registered
+	    $OGoptions = wp_load_alloptions();
+
+	    // only get settings that start with ppOG_
+	    $OGoptions = array_filter($OGoptions, function($key) {
+		    return str_starts_with( $key, OGSettingsData::$settingPrefix);
+	    }, ARRAY_FILTER_USE_KEY);
+
+	    // Deleting all settings in database
+	    foreach ($OGoptions as $option => $value) {
+		    delete_option($option);
+	    }
+    }
 	// ============ Functions ============
 	// A function for registering base settings of the unactivated plugin as activation hook.
-	function registerSettings(): void {
-		// ==== Declaring Variables ====
-		$settingData = new OGSettingsData();
-
+	static function registerSettings(): void {
 		// ==== Start of Function ====
 		// Registering settings
-		foreach ($settingData->settings as $settingName => $settingValue) {
-			add_option($settingData->settingPrefix.$settingName, $settingValue);
+		foreach (OGSettingsData::settings() as $settingName => $settingValue) {
+			add_option(OGSettingsData::$settingPrefix.$settingName, $settingValue);
 		}
 	}
 
-	function createCacheFiles(): void {
+	static function createCacheFiles(): void {
 		// ==== Declaring Variables ====
-		# Classes
-		$settingsData = new OGSettingsData();
-
 		# Variables
-		$cacheFolder = plugin_dir_path(dirname(__DIR__)) . $settingsData->cacheFolder;
+		$cacheFolder = plugin_dir_path(dirname(__DIR__)) . OGSettingsData::$cacheFolder;
 
 		// ==== Start of Function ====
 		// Creating the cache files
-		foreach ($settingsData->cacheFiles as $cacheFile) {
+		foreach (OGSettingsData::cacheFiles() as $cacheFile) {
 			// Creating the cache folder if it doesn't exist
 			if (!file_exists($cacheFolder)) {
 				mkdir($cacheFolder, 0777, true);
@@ -128,7 +139,7 @@ class OGPostTypeData {
 							'folderRedirect' => '',                 // Mapped value CAN BE EMPTY
                             'mediaID' => 'media_Id',                // NON Mapped value
 							'search_id' => 'id_OG_wonen',           // NON Mapped value
-							'datum_toegevoegd' => 'ObjectDate',     // Mapped value
+							'datum_toegevoegd' => 'MediaDate',     // Mapped value
 							'datum_gewijzigd' => 'MediaUpdated',    // Mapped value
 							'mediaName' => 'MediaName',             // Mapped value
 							'media_Groep' => 'MediaType',           // Mapped value
@@ -196,7 +207,7 @@ class OGPostTypeData {
                             'folderRedirect' => 'bog',              // Mapped value CAN BE EMPTY
 							'search_id' => 'id_OG_bog',             // NON Mapped value
 							'mediaID' => 'media_Id',                // NON Mapped value
-							'datum_toegevoegd' => 'ObjectDate',     // Mapped value
+							'datum_toegevoegd' => 'MediaDate',     // Mapped value
 							'datum_gewijzigd' => 'MediaUpdated',    // Mapped value
 							'mediaName' => 'MediaName',             // Mapped value
 							'media_Groep' => 'MediaType',           // Mapped value
@@ -266,7 +277,7 @@ class OGPostTypeData {
 							'folderRedirect' => '',                         // Mapped value CAN BE EMPTY
 							'search_id' => 'id_OG_nieuwbouw_projecten',     // NON Mapped value
 							'mediaID' => 'media_Id',                        // NON Mapped value
-							'datum_toegevoegd' => 'ObjectDate',             // Mapped value
+							'datum_toegevoegd' => 'MediaDate',             // Mapped value
 							'datum_gewijzigd' => 'MediaUpdated',            // Mapped value
 							'mediaName' => 'MediaName',                     // Mapped value
 							'media_Groep' => 'MediaType',                   // Mapped value
@@ -307,7 +318,7 @@ class OGPostTypeData {
 							'folderRedirect' => 'bouwtypen',                         // Mapped value CAN BE EMPTY
 							'search_id' => 'id_OG_nieuwbouw_bouwtypes',     // NON Mapped value
 							'mediaID' => 'media_Id',                        // NON Mapped value
-							'datum_toegevoegd' => 'ObjectDate',             // Mapped value
+							'datum_toegevoegd' => 'MediaDate',             // Mapped value
 							'datum_gewijzigd' => 'MediaUpdated',            // Mapped value
 							'mediaName' => 'MediaName',                     // Mapped value
 							'media_Groep' => 'MediaType',                   // Mapped value
@@ -348,7 +359,7 @@ class OGPostTypeData {
 							'folderRedirect' => 'bouwnummers',                         // Mapped value CAN BE EMPTY
 							'search_id' => 'id_OG_nieuwbouw_bouwnummers',   // NON Mapped value
 							'mediaID' => 'media_Id',                        // NON Mapped value
-							'datum_toegevoegd' => 'ObjectDate',             // Mapped value
+							'datum_toegevoegd' => 'MediaDate',             // Mapped value
 							'datum_gewijzigd' => 'MediaUpdated',            // Mapped value
 							'mediaName' => 'MediaName',                     // Mapped value
 							'media_Groep' => 'MediaType',                   // Mapped value
@@ -372,24 +383,23 @@ class OGPostTypeData {
 	}
 }
 class OGSettingsData {
-	// ============ Declare Variables ============
-	// Strings
-	public string $settingPrefix = 'ppOG_'; // This is the prefix for all the settings used within the OG Plugin.
-	public string $cacheFolder = 'caches/'; // This is the folder where all the cache files are stored within the server/ftp
-	// Arrays
-	public array $apiURLs = [
+	// ======== Declare Variables ========
+	// ==== Strings ====
+	public static string $settingPrefix = 'ppOG_'; // This is the prefix for all the settings used within the OG Plugin.
+	public static string $cacheFolder = 'caches/'; // This is the folder where all the cache files are stored within the server/ftp
+
+    // ==== Arrays ====
+	public static array $apiURLs = [
 		'license' => 'https://og-feeds2.pixelplus.nl/api/validate.php',
 		'syncTimes' => 'https://og-feeds2.pixelplus.nl/api/latest.php'
 	];
-
-	public array $cacheFiles = [
+	public static array $cacheFiles = [
 		'licenseCache' => 'licenseCache.json', // This is the cache file for the checking the Licence key
 	];
-
-	public array $settings = [
+	public static array $settings = [
 		/* Setting Name */'licenseKey' => /* Default Value */       '',     // License Key
 	];
-	public array $adminSettings = [
+	public static array $adminSettings = [
 		// Settings 1
 		/* Option Group= */ 'ppOG_AdminOptions' => [
 			// General information
@@ -413,7 +423,20 @@ class OGSettingsData {
 		]
 	];
 
-	// ============ HTML Functions ============
+    // ==== Getters ====
+    public static function apiURLs(): array {
+        return self::$apiURLs;
+    }
+    public static function cacheFiles(): array {
+        return self::$cacheFiles;
+    }
+    public static function settings(): array {
+        return self::$settings;
+    }
+    public static function adminSettings(): array {
+        return self::$adminSettings;
+    }
+	// ======== HTML Functions ========
 	// Sections
 	function htmlLicenceSection(): void { ?>
         <p>De licentiesleutel die de plugin activeert</p>
@@ -422,7 +445,7 @@ class OGSettingsData {
 	function htmlLicenceKeyField(): void {
 		// ===== Declaring Variables =====
 		// Vars
-		$licenseKey = get_option($this->settingPrefix.'licenseKey');
+		$licenseKey = get_option(self::$settingPrefix.'licenseKey');
 
 		// ===== Start of Function =====
 		// Check if licenseKey is empty
@@ -430,7 +453,7 @@ class OGSettingsData {
 			// Display a message
 			echo('De licentiesleutel is nog niet ingevuld.');
 		}
-		echo(" <input type='text' name='".$this->settingPrefix."licenseKey' value='".esc_attr($licenseKey)."' ");
+		echo(" <input type='text' name='".self::$settingPrefix."licenseKey' value='".esc_attr($licenseKey)."' ");
 	}
 }
 class OGMapping {
@@ -495,7 +518,7 @@ class OGMapping {
 						unset($mappingTable[$mappingKey]);
 					}
 				}
-				// ==== Checking concatinations ====
+				// ==== Checking concatenations ====
 				if (str_starts_with($mappingValue['pixelplus'], '{') and str_ends_with($mappingValue['pixelplus'], '}')) {
 					// ==== Declaring Variables ====
 					# Vars
@@ -857,15 +880,13 @@ class OGTableMappingDisplay {
 	}
 }
 class OGPostTypes {
-	// ==== Declaring Variables ====
-
 	// ==== Start of Class ====
 	function __construct() {
         # Creating the post types
 		add_action('init', array($this, 'createPostTypes'));
 
         # Checking the post migration
-//		add_action('init', array($this, 'checkMigrationPostTypes'));
+		// add_action('init', array($this, 'checkMigrationPostTypes'));
 	}
 
 	// =========== Functions ===========
@@ -1089,10 +1110,11 @@ class OGOffers {
 				'_wp_attached_file' => $boolIsConnectedPartner ? $mediaObject->media_URL : $media_url,
 				'file_url' => $boolIsConnectedPartner ? $mediaObject->media_URL : $media_url,
 				'_wp_attachment_metadata' => '',
-				'ObjectCode' => $OGobject->{$databaseKey['objectCode']},
-				'MediaType' => strtoupper($mediaObject->{$databaseKeysMedia['media_Groep']}),
-				'MediaName' => $mediaObject->{$databaseKeysMedia['mediaName']},
-				'MediaUpdated' => $mediaObject->{$databaseKeysMedia['datum_gewijzigd']},
+				$databaseKey['objectCode'] => $OGobject->{$databaseKey['objectCode']},
+				$databaseKeysMedia['media_Groep'] => strtoupper($mediaObject->{$databaseKeysMedia['media_Groep']}),
+				$databaseKeysMedia['mediaName'] => $mediaObject->{$databaseKeysMedia['mediaName']},
+				$databaseKeysMedia['datum_gewijzigd'] => $mediaObject->{$databaseKeysMedia['datum_gewijzigd']},
+                $databaseKeysMedia['datum_toegevoegd'] => $mediaObject->{$databaseKeysMedia['datum_toegevoegd']},
 				'_wp_attachment_image_alt' => '',
 				$mediaTiaraIDName => $mediaObject->{$mediaTiaraIDName},
 			];
