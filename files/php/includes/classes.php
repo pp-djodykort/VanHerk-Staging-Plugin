@@ -483,7 +483,7 @@ class OGVanHerkMapping {
 	}
 
 	// ================ Begin of Class ================
-	function cleanupObjects($OGTableRecord): mixed {
+	private static function cleanupObjects($OGTableRecord): mixed {
 		foreach ($OGTableRecord as $OGTableRecordKey => $OGTableRecordValue) {
 			# Check if the value is empty and if so remove the whole key from the OBJECT
 			if ($OGTableRecordValue == '' or $OGTableRecordValue == NULL or $OGTableRecordValue == 'NULL') {
@@ -494,7 +494,7 @@ class OGVanHerkMapping {
 		# Return the cleaned up OBJECT
 		return $OGTableRecord;
 	}
-	function mapMetaData($OGTableRecord, $databaseKeysMapping, $locationCodes=[], $databaseKeys=[]) {
+	public static function mapMetaData($OGTableRecord, $databaseKeysMapping, $locationCodes=[], $databaseKeys=[]) {
 		if (!empty($databaseKeysMapping)) {
 			// ======== Declaring Variables ========
 			# Classes
@@ -505,7 +505,7 @@ class OGVanHerkMapping {
 			// ========================= Start of Function =========================
 			// ================ Cleaning the Tables/Records ================
 			# Getting rid of all the useless and empty values in the OBJECT
-			$OGTableRecord = $this->cleanupObjects($OGTableRecord);
+			$OGTableRecord = self::cleanupObjects($OGTableRecord);
 			# Getting rid of all the useless and empty values in the MAPPING TABLE
 			foreach ($mappingTable as $mappingKey => $mappingTableValue) {
 				# Check if the value is empty and if so remove the whole key from the OBJECT
@@ -771,7 +771,7 @@ class OGVanHerkMapping {
 		else {
 			// ================ Cleaning the Tables/Records ================
 			# Getting rid of all the useless and empty values in the OBJECT
-			$OGTableRecord = $this->cleanupObjects($OGTableRecord);
+			$OGTableRecord = self::cleanupObjects($OGTableRecord);
 		}
 
 		// ================ Returning the Object ================
@@ -1072,7 +1072,6 @@ class OGVanHerkOffers {
 		// ============ Declaring Variables ============
 		# Classes
 		global $wpdb;
-		$OGMapping = new OGVanHerkMapping();
 
 		# Variables
 		$databaseKeysMedia = $databaseKey['media'];
@@ -1095,7 +1094,7 @@ class OGVanHerkOffers {
 		foreach ($mediaObjects as $mediaObject) {
 			// ======== Declaring Variables ========
 			# Mapping the data
-			$mediaObject = $OGMapping->mapMetaData($mediaObject, ($databaseKeysMedia['mapping'] ?? []));
+			$mediaObject = OGVanHerkMapping::mapMetaData($mediaObject, ($databaseKeysMedia['mapping'] ?? []));
 			$mediaQuery = new WP_Query([
 				'post_type' => 'attachment',
 				'meta_key' => $databaseKeysMedia['mediaName'],
@@ -1203,9 +1202,6 @@ class OGVanHerkOffers {
 	}
 	function updatePost($postTypeName, $postID, $OGobject, $databaseKey, $parentPostID=''): void {
 		// ======== Declaring Variables ========
-		# Classes
-		$ogMapping = new OGVanHerkMapping();
-
 		# Vars
 		$post_data = [
 			'ID' => $postID,
@@ -1304,7 +1300,6 @@ class OGVanHerkOffers {
 		// ======== Declaring Variables ========
 		# Classes
 		global $wpdb;
-		$OGMapping = new OGVanHerkMapping();
 
 		# Variables
 		$OGBouwtypeID = $OGBouwtype->id;
@@ -1323,7 +1318,7 @@ class OGVanHerkOffers {
 
 			// ======== Declaring Variables ========
 			# Variables
-			$OGBouwnummer = $OGMapping->mapMetaData($OGBouwnummer, ($databaseKeys[2]['mapping'] ?? []), $locationCodes, $databaseKeys);
+			$OGBouwnummer = OGVanHerkMapping::mapMetaData($OGBouwnummer, ($databaseKeys[2]['mapping'] ?? []), $locationCodes, $databaseKeys);
 			# Post - Bouwnummer
 			$postData = new WP_Query([
 				'post_type' => $postTypeName,
@@ -1369,7 +1364,6 @@ class OGVanHerkOffers {
 		// ======== Declaring Variables ========
 		# Classes
 		global $wpdb;
-		$OGMapping = new OGVanHerkMapping();
 
 		# Variables
 		$OGProjectID = $OGProject->id;
@@ -1388,7 +1382,7 @@ class OGVanHerkOffers {
 			}
 
 			// ======== Declaring Variables ========
-			$OGBouwtype = $OGMapping->mapMetaData($OGBouwtype, ($databaseKeys[1]['mapping'] ?? []), $locationCodes, $databaseKeys);
+			$OGBouwtype = OGVanHerkMapping::mapMetaData($OGBouwtype, ($databaseKeys[1]['mapping'] ?? []), $locationCodes, $databaseKeys);
 			# Post - Bouwtype
 			$postData = new WP_Query([
 				'post_type' => $postTypeName,
@@ -1436,7 +1430,7 @@ class OGVanHerkOffers {
 		# ============ Declaring Variables ============
 		# Classes
 		global $wpdb;
-		$OGMapping = new OGVanHerkMapping();
+
 		# Variables
 		$projectIds = [];
 		$locationCodes = $this->getLocationCodes();
@@ -1460,7 +1454,7 @@ class OGVanHerkOffers {
 
 			// ======== Declaring Variables ========
 			# Remapping the object
-			$OGProject = $OGMapping->mapMetaData($OGProject, ($databaseKeys[0]['mapping'] ?? []), $locationCodes, $databaseKeys);
+			$OGProject = OGVanHerkMapping::mapMetaData($OGProject, ($databaseKeys[0]['mapping'] ?? []), $locationCodes, $databaseKeys);
 
 			# Post - Project
 			$postData = new WP_Query([
@@ -1515,8 +1509,6 @@ class OGVanHerkOffers {
 
 	function checkNormalPosts($postTypeName, $OGobjects, $databaseKey): void {
 		// ============ Declaring Variables ============
-		# Classes
-		$OGMapping = new OGVanHerkMapping();
 		# Variables
 		$locationCodes = $this->getLocationCodes();
 		$objectIDs = [];
@@ -1527,7 +1519,7 @@ class OGVanHerkOffers {
 			// ======== Declaring Variables ========
 			# ==== Variables ====
 			# Remapping the object
-			$OGobject = $OGMapping->mapMetaData($OGobject, ($databaseKey['mapping'] ?? []), $locationCodes);
+			$OGobject = OGVanHerkMapping::mapMetaData($OGobject, ($databaseKey['mapping'] ?? []), $locationCodes);
 
 			$postData = new WP_Query([
 				'post_type' => $postTypeName,
