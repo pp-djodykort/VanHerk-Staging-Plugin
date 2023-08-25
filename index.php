@@ -16,13 +16,13 @@ include_once 'files/php/includes/classes.php';
 include_once 'files/php/includes/functions.php';
 
 // ============ Activation and Deactivation and Uninstall ============
-register_activation_hook(__FILE__, 'OGActivationAndDeactivation::activate');
-register_deactivation_hook(__FILE__, 'OGActivationAndDeactivation::deactivate');
-register_uninstall_hook(__FILE__, 'OGActivationAndDeactivation::uninstall');
+register_activation_hook(__FILE__, 'OGVanHerkActivationAndDeactivation::activate' );
+register_deactivation_hook(__FILE__, 'OGVanHerkActivationAndDeactivation::deactivate' );
+register_uninstall_hook(__FILE__, 'OGVanHerkActivationAndDeactivation::uninstall' );
 
 // ============ Classes initialisation ============
-$OGPostTypes = new OGPostTypes();
-$OGMenu = new OGMenu();
+$OGPostTypes = new OGVanHerkPostTypes();
+$OGMenu = new OGVanHerkMenus();
 
 // ============ Start ============
 //adminNotice('success', getLoadTime());

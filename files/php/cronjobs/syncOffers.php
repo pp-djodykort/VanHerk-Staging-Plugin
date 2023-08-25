@@ -59,7 +59,7 @@ ini_set( 'memory_limit', '-1' );
 global $wpdb;
 
 // ============ Start of Program ============
-$ogOffers = new OGOffers();
+$ogOffers = new OGVanHerkOffers();
 
 // ============ End of Program ============
 if ($boolLockFileSystemEnabled) {

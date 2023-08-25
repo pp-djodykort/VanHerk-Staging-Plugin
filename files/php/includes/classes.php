@@ -3,7 +3,7 @@
 include_once("functions.php");
 
 // ==== Activation and Deactivation (Uninstallation is in the functions.php because it needs to be a static function) ====
-class OGActivationAndDeactivation {
+class OGVanHerkActivationAndDeactivation {
 	// ======== Activation ========
 	static function activate(): void {
 		self::registerSettings();
@@ -24,7 +24,7 @@ class OGActivationAndDeactivation {
 
 	    // only get settings that start with ppOG_
 	    $OGoptions = array_filter($OGoptions, function($key) {
-		    return str_starts_with( $key, OGSettingsData::$settingPrefix);
+		    return str_starts_with( $key, OGVanHerkSettingsData::$settingPrefix);
 	    }, ARRAY_FILTER_USE_KEY);
 
 	    // Deleting all settings in database
@@ -37,19 +37,19 @@ class OGActivationAndDeactivation {
 	static function registerSettings(): void {
 		// ==== Start of Function ====
 		// Registering settings
-		foreach (OGSettingsData::settings() as $settingName => $settingValue) {
-			add_option(OGSettingsData::$settingPrefix.$settingName, $settingValue);
+		foreach (OGVanHerkSettingsData::settings() as $settingName => $settingValue) {
+			add_option( OGVanHerkSettingsData::$settingPrefix . $settingName, $settingValue);
 		}
 	}
 
 	static function createCacheFiles(): void {
 		// ==== Declaring Variables ====
 		# Variables
-		$cacheFolder = plugin_dir_path(dirname(__DIR__)) . OGSettingsData::$cacheFolder;
+		$cacheFolder = plugin_dir_path(dirname(__DIR__)) . OGVanHerkSettingsData::$cacheFolder;
 
 		// ==== Start of Function ====
 		// Creating the cache files
-		foreach (OGSettingsData::cacheFiles() as $cacheFile) {
+		foreach (OGVanHerkSettingsData::cacheFiles() as $cacheFile) {
 			// Creating the cache folder if it doesn't exist
 			if (!file_exists($cacheFolder)) {
 				mkdir($cacheFolder, 0777, true);
@@ -66,15 +66,17 @@ class OGActivationAndDeactivation {
 }
 
 // ==== Data Classes ====
-class OGPostTypeData {
+class OGVanHerkPostTypeData {
 	// ============ Begin of Class ============
-	function customPostTypes(): array {
+	public static function customPostTypes(): array {
 		// ===== Start of Construct =====
 		return array(
-			// Post Type 1
-			/* post_type */'wonen' => array(
+			// Custom Post Type: 'wonen'
+			'wonen' => array(
 				'post_type_args' => array(
+					// This is just all the data / instructions that WordPress needs to know about the custom post type so that it can work correctly.
 					'labels' => array(
+						// Labels for the custom post type in the WordPress admin
 						'name' => 'OG Wonen Objecten',
 						'singular_name' => 'OG Wonen Object',
 						'add_new' => 'Nieuwe toevoegen',
@@ -121,33 +123,47 @@ class OGPostTypeData {
 				'database_tables' => array(
 					'object' => array(
 						# TableName
-						'tableName' => 'tbl_OG_wonen',
+						'tableName' => 'tbl_OG_wonen',                                      // NON Mapped - Name of the table
 						# Normal fields
-						'ID' => '_id',                              // Mapped value
-						'post_title' => 'straat;huisnummer;huisnummertoevoeging;plaats', // Mapped value
-                        'post_name' => 'straat-huisnummer-huisnummertoevoeging-plaats',  // Mapped value
-						'post_content' => 'aanbiedingstekst',       // Mapped value
-						'datum_gewijzigd' => 'ObjectUpdated',       // Mapped value
-						'datum_toegevoegd' => 'ObjectDate',         // Mapped value
-						'objectCode' => 'ObjectCode',               // Mapped value
+						'ID' => '_id',                                                      // Mapped value - ALWAYS Use the TiaraID
+						/*
+                        Warning: You can only use one of the separators at the same time.
+                        post_title Separators:
+                            ; (Semicolon)   - The semi-colon is used to separate the values from each other with ' '
+                            | (Pipe)        - The pipe is used as an if statement, if the first value is empty, then the second value will be used if it exists
+                            Nothing       - If there is no separator, it will just use the first value. The only variable given in
+                        */
+                        'post_title' => 'straat;huisnummer;huisnummertoevoeging;plaats',    // Mapped value - Default: Straat;Huisnummer;Huisnummertoevoeging;Woonplaats
+						/*
+						Warning: You can only use one of the separators at the same time.
+						post_name Separators:
+							- (Dash)      - The dash is used to separate the values from each other with '-'
+							| (Pipe)      - The pipe is used as an if statement, if the first value is empty, then the second value will be used if it exists
+							Nothing       - If there is no separator, it will just use the first value. The only variable given in
+						 */
+                        'post_name' => 'straat-huisnummer-huisnummertoevoeging-plaats',     // Mapped value - Default: Straat-Huisnummer-Huisnummertoevoeging-Woonplaats
+						'post_content' => 'aanbiedingstekst',                               // Mapped value - Default: De aanbiedingstekst
+						'datum_gewijzigd' => 'ObjectUpdated',                               // Mapped value - Default: datum_gewijzigd      ; Default value is only for objects without a mapping table within the database
+						'datum_toegevoegd' => 'ObjectDate',                                 // Mapped value - Default: datum_toegevoegd     ; Default value is only for objects without a mapping table within the database
+						'objectCode' => 'ObjectCode',                                       // Mapped value - Default: object_ObjectCode    ; Default value is only for objects without a mapping table within the database
 
 						# Post fields
 						'media' => array(
 							# TableName
-							'tableName' => 'tbl_OG_media',
+							'tableName' => 'tbl_OG_media',          // NON Mapped - Name of the table
 							# Normal fields
-							'folderRedirect' => '',                 // Mapped value CAN BE EMPTY
-                            'mediaID' => 'media_Id',                // NON Mapped value
-							'search_id' => 'id_OG_wonen',           // NON Mapped value
-							'datum_toegevoegd' => 'MediaDate',     // Mapped value
-							'datum_gewijzigd' => 'MediaUpdated',    // Mapped value
-							'mediaName' => 'MediaName',             // Mapped value
-							'media_Groep' => 'MediaType',           // Mapped value
+							'folderRedirect' => '',                 // FTP Folder name of media from OG Feeds - ALLOWED TO BE EMPTY
+							'search_id' => 'id_OG_wonen',           // NON Mapped value - Default: Can found in OG Feeds media table > Id of Post Type / OG Type
+                            'mediaID' => 'media_Id',                // NON Mapped value - Default: media_Id; Can found in OG Feeds media table > Post Type / OG Type
+							'datum_toegevoegd' => 'MediaDate',      // Mapped value     - Default: datum_toegevoegd ; Default value is only for objects without a mapping table within the database
+							'datum_gewijzigd' => 'MediaUpdated',    // Mapped value     - Default: datum_gewijzigd  ; Default value is only for objects without a mapping table within the database
+							'mediaName' => 'MediaName',             // Mapped value     - Default: mediaName        ; This one is special. Even in the normal plugin I still have this one mapped within the database in a mapping table. Default value is only for objects without a mapping table within the database
+							'media_Groep' => 'MediaType',           // Mapped value     - Default: media_Groep      ; Default value is only for objects without a mapping table within the database
 
 							# Post fields
 							'object_keys' => array(
-								'objectTiara' => '_id',
-								'objectVestiging' => 'ObjectVerstigingsNummer',
+								'objectTiara' => '_id',                         // Mapped value - ALWAYS Use the TiaraID
+								'objectVestiging' => 'ObjectVerstigingsNummer', // Mapped value - USE the Vestigingsnummer of the OG Object, NOT The media objects.
 							),
 
 							# Only if mapping is neccesary uncomment the following lines and fill in the correct table name
@@ -158,10 +174,12 @@ class OGPostTypeData {
 					),
 				)
 			),
-			// Post Type 2
-			/* post_type */'bedrijven' => array(
+			// Custom Post Type: 'bedrijven'
+			'bedrijven' => array(
 				'post_type_args' => array(
+					// This is just all the data / instructions that WordPress needs to know about the custom post type so that it can work correctly.
 					'labels' => array(
+						// Labels for the custom post type in the WordPress admin
 						'name' => 'OG BOG Objecten',
 						'singular_name' => 'OG BOG Object',
 						'add_new' => 'Nieuwe toevoegen',
@@ -226,10 +244,12 @@ class OGPostTypeData {
 					),
 				)
 			),
-			// Post Type 3
-			/* post_type */'nieuwbouw' => array(
+			// Custom Post Type: 'nieuwbouw'
+			'nieuwbouw' => array(
 				'post_type_args' => array(
+					// This is just all the data / instructions that WordPress needs to know about the custom post type so that it can work correctly.
 					'labels' => array(
+						// Labels for the custom post type in the WordPress admin
 						'name' => 'OG Nieuwbouw Objecten',
 						'singular_name' => 'OG Nieuwbouw Object',
 						'add_new' => 'Nieuwe toevoegen',
@@ -382,7 +402,7 @@ class OGPostTypeData {
 		);
 	}
 }
-class OGSettingsData {
+class OGVanHerkSettingsData {
 	// ======== Declare Variables ========
 	// ==== Strings ====
 	public static string $settingPrefix = 'ppOG_'; // This is the prefix for all the settings used within the OG Plugin.
@@ -456,7 +476,7 @@ class OGSettingsData {
 		echo(" <input type='text' name='".self::$settingPrefix."licenseKey' value='".esc_attr($licenseKey)."' ");
 	}
 }
-class OGMapping {
+class OGVanHerkMapping {
 	// ================ Constructor ================
 	function __construct() {
 
@@ -761,17 +781,17 @@ class OGMapping {
 }
 
 // ============ Start of Classes ============
-class OGMenu {
+class OGVanHerkMenus {
 	// ============ Constructor ============
 	function __construct() {
 		// ========== Start of Function ==========
-		add_action('admin_menu', array($this, 'addMenu'));
+		add_action('admin_menu', array($this, 'addMenus'));
 	}
 
 	// ================ Begin of Class ================
 	# ==== Functions ====
 	# This function is for adding the menu to the admin panel
-	function addMenu(): void {
+	function addMenus(): void {
 		// ======== Start of Function ========
 		// add_menu_page(
 		//	'Pixelplus OG Plugin',
@@ -809,9 +829,8 @@ class OGMenu {
 	function htmlMenu(): void {
 		// ========== Declaring Variables ==========
 		# Classes
-		$ogTableMapping = new OGTableMappingDisplay();
-        $OGPostData = new OGPostTypeData();
-		$OGPostData = $OGPostData->customPostTypes();
+		$ogTableMapping = new OGVanHerkTableMappingDisplay();
+		$OGPostData = OGVanHerkPostTypeData::customPostTypes();
 		# Vars
 		$postWonen_columns = $ogTableMapping->getPostColumns('wonen');
 		$tableWonen_columns = $ogTableMapping->getTableColumns($OGPostData['wonen']['database_tables']['object']['tableName']);
@@ -845,7 +864,7 @@ class OGMenu {
         <p>dingdong bishass</p>
 		<?php htmlFooter('OG Aanbod Dashboard');}
 }
-class OGTableMappingDisplay {
+class OGVanHerkTableMappingDisplay {
 	// ============ Constructor ============
 	function __construct() {
 		// ========== Start of Function ==========
@@ -884,7 +903,7 @@ class OGTableMappingDisplay {
 		return $wpdb->get_results( "SHOW COLUMNS FROM " . $tableName);
 	}
 }
-class OGPostTypes {
+class OGVanHerkPostTypes {
 	// ==== Start of Class ====
 	function __construct() {
         # Creating the post types
@@ -896,14 +915,9 @@ class OGPostTypes {
 
 	// =========== Functions ===========
 	function createPostTypes(): void {
-		// ==== Declaring Variables ====
-		// Classes
-		$postTypeData = new OGPostTypeData();
-		$postTypeData = $postTypeData->customPostTypes();
-
 		// ==== Start of Function ====
-		// Create the OG Custom Post Types (if the user has access to it)
-		foreach($postTypeData as $postType => $postTypeArray) {
+		# Create the OG Custom Post Types (if the user has access to it)
+		foreach(OGVanHerkPostTypeData::customPostTypes() as $postType => $postTypeArray) {
 			register_post_type($postType, $postTypeArray['post_type_args']);
 		}
 	}
@@ -912,8 +926,7 @@ class OGPostTypes {
 		// ==== Declaring Variables ====
 		# Classes
 		global $wpdb;
-		$postTypeData = new OGPostTypeData();
-		$postTypeData = $postTypeData->customPostTypes();
+		$postTypeData = OGVanHerkPostTypeData::customPostTypes();
 
 		# Variables
 		$defaultPrefix = "wp_cpt_";
@@ -932,7 +945,7 @@ class OGPostTypes {
 		}
 	}
 }
-class OGOffers {
+class OGVanHerkOffers {
 	// ================ Start of Class ================
 	function __construct() {
 		# Use this one if it is going to be run on the site itself.
@@ -958,7 +971,7 @@ class OGOffers {
 				$post_data['post_title'] = $object->{$postTitle[1]};
 			}
 		}
-		else {
+		elseif (str_contains($databaseKey['post_title'], ';')) {
 			$postTitle = explode(';', $databaseKey['post_title']);
 			$processedTitles = [];
 
@@ -974,9 +987,12 @@ class OGOffers {
 					$processedTitles[] = $objectTitle;
 				}
 			}
-
 			$post_data['post_title'] = implode(' ', $processedTitles);
 		}
+        else {
+            # If there are no separators just think of it as one title and one variable
+            $post_data['post_title'] = ucfirst(strtolower($object->{$databaseKey['post_title']} ?? ''));
+        }
 
         # ======== Post Name ========
         if (str_contains($databaseKey['post_name'], '-')) {
@@ -1056,7 +1072,7 @@ class OGOffers {
 		// ============ Declaring Variables ============
 		# Classes
 		global $wpdb;
-		$OGMapping = new OGMapping();
+		$OGMapping = new OGVanHerkMapping();
 
 		# Variables
 		$databaseKeysMedia = $databaseKey['media'];
@@ -1188,7 +1204,7 @@ class OGOffers {
 	function updatePost($postTypeName, $postID, $OGobject, $databaseKey, $parentPostID=''): void {
 		// ======== Declaring Variables ========
 		# Classes
-		$ogMapping = new OGMapping();
+		$ogMapping = new OGVanHerkMapping();
 
 		# Vars
 		$post_data = [
@@ -1288,7 +1304,7 @@ class OGOffers {
 		// ======== Declaring Variables ========
 		# Classes
 		global $wpdb;
-		$OGMapping = new OGMapping();
+		$OGMapping = new OGVanHerkMapping();
 
 		# Variables
 		$OGBouwtypeID = $OGBouwtype->id;
@@ -1353,7 +1369,7 @@ class OGOffers {
 		// ======== Declaring Variables ========
 		# Classes
 		global $wpdb;
-		$OGMapping = new OGMapping();
+		$OGMapping = new OGVanHerkMapping();
 
 		# Variables
 		$OGProjectID = $OGProject->id;
@@ -1420,7 +1436,7 @@ class OGOffers {
 		# ============ Declaring Variables ============
 		# Classes
 		global $wpdb;
-		$OGMapping = new OGMapping();
+		$OGMapping = new OGVanHerkMapping();
 		# Variables
 		$projectIds = [];
 		$locationCodes = $this->getLocationCodes();
@@ -1500,7 +1516,7 @@ class OGOffers {
 	function checkNormalPosts($postTypeName, $OGobjects, $databaseKey): void {
 		// ============ Declaring Variables ============
 		# Classes
-		$OGMapping = new OGMapping();
+		$OGMapping = new OGVanHerkMapping();
 		# Variables
 		$locationCodes = $this->getLocationCodes();
 		$objectIDs = [];
@@ -1555,12 +1571,11 @@ class OGOffers {
 		// ============ Declaring Variables ============
 		# Classes
 		global $wpdb;
-		$postTypeData = new OGPostTypeData();
 
 		# Variables
         date_default_timezone_set('Europe/Amsterdam');
 		$beginTime = time();
-		$postTypeData = $postTypeData->customPostTypes();
+		$postTypeData = OGVanHerkPostTypeData::customPostTypes();
 		// ============ Start of Function ============
         # ==== Checking all the post types ====
 		foreach ($postTypeData as $postTypeName => $postTypeArray) {
