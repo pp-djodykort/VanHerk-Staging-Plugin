@@ -1593,8 +1593,9 @@ class OGVanHerkOffers {
 				$this->checkNieuwbouwPosts($postTypeName, $databaseKeys);
 			}
 			else {
+				$last_cronjob = $wpdb->get_results("SELECT datetime FROM cronjobs ORDER BY datetime LIMIT 1");
 				foreach ($databaseKeys as $databaseKey) {
-					$OGobjects = $wpdb->get_results("SELECT * FROM {$databaseKey['tableName']}");
+					$OGobjects = $wpdb->get_results("SELECT * FROM {$databaseKey['tableName']} WHERE datum_gewijzigd >= {$last_cronjob[0]->datetime}");
 
 					# Removing every null out of the objects so Wordpress won't get crazy.
 					foreach ($OGobjects as $key => $object) {
