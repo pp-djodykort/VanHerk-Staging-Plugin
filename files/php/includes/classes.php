@@ -516,6 +516,74 @@ class OGVanHerkMapping {
 
 			// ================ Mapping the Data ================
 			foreach ($mappingTable as $mappingKey => $mappingValue) {
+				/*
+                Placeholders:
+
+                () = If-Else Statement: If statement with unlimited statements that can go in it
+                     Separator between values:
+				        1. | (Pipe) - The pipe is used as an if statement, if the first value is empty, then the second value will be used if it exists
+
+				    Examples:
+				        1. (straat|adres) => If straat is empty, use adres instead
+                        2. (straat|adres|plaats) => If straat is empty, use adres instead, if adres is empty, use plaats instead
+
+				----------------------------
+                [] = Array Extraction: Instead of using the array it converts it to a string with an comma as separator.
+				    Input:
+                    String “[value1, value2, value3, etc.]”
+
+				    Example: [1,2,3] => '1, 2, 3'
+
+				----------------------------
+                {} = Concatenation: Join the values together.
+                    Separator between values:
+				        1. + (Plus) - The plus is used to separate the values from each other with ' '
+				        2. - (Dash) - The dash is used to separate the values from each other with '-'
+
+				    Placeholders within concatenation:
+				    ~ (Tilde) - Remove all the spaces from the value
+
+				    Examples:
+				        1. {straat+huisnummer+huisnummertoevoeging} => 'Vroedelstroefe 48 15 B'
+                        2. {straat+huisnummer+~huisnummertoevoeging~} => 'Vroedelstroefe 48 15B'
+				        3. {straat-huisnummer-huisnummertoevoeging} => 'Vroedelstroefe-48-15-B'
+                        4. {straat-huisnummer-~huisnummertoevoeging~} => 'Vroedelstroefe-48-15B'
+
+				----------------------------
+                $  = Status Handling: Transform values based on specific statuses.
+				    Separator between values:
+				        1. | (Pipe) - The pipe is used as an if statement, if the first value is empty, then the second value will be used if it exists
+
+				    Options:
+				        1. $status|sold$ => If status is "sold", set pixelplus to 1, otherwise 0.
+				        2. $price|prijs$ => If price is greater than 0, set pixelplus to 1, otherwise 0.
+				        3. $rating|onderhoudswaardering$ => Setting everything to lowercase besides the first letter and removing all the spaces.
+
+				----------------------------
+                <> = Location Codes: Map numeric codes to values. Convert date-like values to datetime.
+                     Options:
+				        1. <city_code> = Numeric Office Code (If value is in array city codes, convert to corresponding city name)
+                        2. <date_like_value> => Convert date-like value to Unix timestamp
+
+                     Examples:
+                        <bouwNummer_NVMVestigingNR> = 551235 => "Amsterdam"
+				        <datum_toegevoegd> = '2021-01-01' => 1609459200
+
+				----------------------------
+                ^  = Counting: Calculate and store counts.
+                     Options:
+                        1. ^bouwtypes^ => Calculate based off and store the count of build types for a project.
+                        2. ^bouwnummers^ => Calculate and store the count of build numbers for a project.
+
+				----------------------------
+                *  = Object Types: Conditionally set values based on conditions. !(Only works with 2 values)!
+                    Options:
+                        1. *property_type|Residential* => If property type exists, set to "Residential".
+                        2. *property_type|Commercial* => If property type doesn't exist, set to "Commercial".
+
+                    Examples:
+                        objecttype = *wonen_Appartement_KenmerkAppartement|woonhuis*
+                */
 				// ==== Checking conditional ====
 				if (str_starts_with($mappingValue['pixelplus'], '(') and str_ends_with($mappingValue['pixelplus'], ')')) {
 					// ==== Declaring Variables ====
@@ -547,38 +615,55 @@ class OGVanHerkMapping {
 					$arrExplodedKeyMinus = explode('-', $strTrimmedKey);
 					$strResult = '';
 
-                    # Bools
-                    $boolTrimSpaces = False;
-
 					// ==== Start of Function ====
-					# Step 1: Looping through all the keys
+					# Looping through the plus keys
 					foreach($arrExplodedKey as $arrExplodedKeyValue) {
-                        # Step 2: Checking if there are any special character at the beginning and or end of the key
+                        // ==== Declaring Variables ====
+                        # Bools
+						$boolTrimSpaces = False;
+
+                        // ==== Start of Function ====
+                        # Step 1: Checking if there are any special character at the beginning and or end of the key
                         if (str_starts_with($arrExplodedKeyValue, '~') and str_ends_with($arrExplodedKeyValue, '~')) {
-                            # Step 3: Remove the ~ from the value and all the spaces. And then adding it to strResult
+                            # Step 2: Remove the ~ from the value and all the spaces. And then adding it to strResult
                             $boolTrimSpaces = True;
 
-                            # Removing the ~ from the value
+                            # Step 3: Removing the ~ from the value
                             $arrExplodedKeyValue = trim($arrExplodedKeyValue, '~');
                         }
 
-						# Step 2: Check if the key even isset or empty in OG Record
+						# Step 4: Check if the key even isset or empty in OG Record
 						if (isset($OGTableRecord->{$arrExplodedKeyValue}) and !empty($OGTableRecord->{$arrExplodedKeyValue})) {
-							# Step 4: Adding it to strResult
+							# Step 5: Adding it to strResult
 							$strResult .= $boolTrimSpaces ? str_replace(' ', '', $OGTableRecord->{$arrExplodedKeyValue}).' ' : $OGTableRecord->{$arrExplodedKeyValue}.' ';
                         }
 					}
+                    # Looping through the minus keys
 					foreach($arrExplodedKeyMinus as $arrExplodedKeyValue) {
-						# Step 2: Check if the key even isset or empty in OG Record
+                        // ==== Declaring Variables ====
+						# Bools
+						$boolTrimSpaces = False;
+
+                        // ==== Start of Function ====
+                        # Step 1: Checking if there are any special character at the beginning and or end of the key
+                        if (str_starts_with($arrExplodedKeyValue, '~') and str_ends_with($arrExplodedKeyValue, '~')) {
+                            # Step 2: Remove the ~ from the value and all the spaces. And then adding it to strResult
+                            $boolTrimSpaces = True;
+
+                            # Step 3: Removing the ~ from the value
+                            $arrExplodedKeyValue = trim($arrExplodedKeyValue, '~');
+                        }
+
+						# Step 4: Check if the key even isset or empty in OG Record
 						if (isset($OGTableRecord->{$arrExplodedKeyValue}) and !empty($OGTableRecord->{$arrExplodedKeyValue})) {
-							# Step 3: Add the value to the result string
-							$strResult .= $OGTableRecord->{$arrExplodedKeyValue}.'-';
-						}
+                            # Step 5: Adding it to strResult
+                            $strResult .= $boolTrimSpaces ? str_replace(' ', '', $OGTableRecord->{$arrExplodedKeyValue}).'-' : $OGTableRecord->{$arrExplodedKeyValue}.'-';
+                        }
 					}
-					# Step 5: Putting it in the mapping table as a default value
+
+					# Putting it in the mapping table as a default value
 					$mappingTable[$mappingKey]['pixelplus'] = "'".rtrim($strResult, ' -')."'";
 				}
-
 				// ==== Checking the statuses ====
 				if (str_starts_with($mappingValue['pixelplus'], '$') and str_ends_with($mappingValue['pixelplus'], '$')) {
 					// ==== Declaring Variables ====
@@ -615,7 +700,6 @@ class OGVanHerkMapping {
                         }
                     }
 				}
-
 				// ==== Checking arrays ====
 				if (str_starts_with($mappingValue['pixelplus'], '[') and str_ends_with($mappingValue['pixelplus'], ']')) {
 					// ==== Declaring Variables ====
@@ -650,7 +734,6 @@ class OGVanHerkMapping {
 
 					}
 				}
-
 				// ==== Checking location codes ====
 				if (str_starts_with($mappingValue['pixelplus'], '<') and str_ends_with($mappingValue['pixelplus'], '>')) {
 					// ==== Declaring Variables ====
@@ -659,11 +742,10 @@ class OGVanHerkMapping {
 
 					// ==== Start of Function ====
 					if (!empty($strTrimmedKey)) {
-						# Step 1: Getting the value from the OG Record
-
-						# Step 2: Checking if the value is empty
+						# Step 2: Checking if the value is NOT empty
 						if (isset($OGTableRecord->{$strTrimmedKey}) and !empty($OGTableRecord->{$strTrimmedKey})) {
-							# Step 3: Check if it's a number or a string
+							# Step 3: If value is a numeric
+                            # Converting numeric value to Location Code
 							if (is_numeric($OGTableRecord->{$strTrimmedKey})) {
 								# Step 4: Checking if the value is in the locationCodes array
 								$key = array_search($OGTableRecord->{$strTrimmedKey}, $locationCodes[0]);
@@ -672,6 +754,8 @@ class OGVanHerkMapping {
 									$OGTableRecord->{$mappingTable[$mappingKey]['vanherk']} = $locationCodes[1][$key];
 								}
 							}
+
+                            # Converting the value to Unix Timestamp
 							else {
 								# Step 4: Checking if the value is can be converted to a datetime
 								$datetime = strtotime($OGTableRecord->{$strTrimmedKey});
@@ -683,7 +767,6 @@ class OGVanHerkMapping {
 						}
 					}
 				}
-
                 // ==== Checking the total buildnumbers/buildtypes ====
 				if (str_starts_with($mappingValue['pixelplus'], '^') and str_ends_with($mappingValue['pixelplus'], '^')) {
                     // ==== Declaring Variables ====
@@ -713,8 +796,7 @@ class OGVanHerkMapping {
                         }
                     }
                 }
-
-                // ==== Checking the objecttype ====
+                // ==== Checking the objecttype (basically a conditional ) ====
                 if (str_starts_with($mappingValue['pixelplus'], '*') and str_ends_with($mappingValue['pixelplus'], '*')) {
                     // ==== Declaring Variables ====
                     # Vars
@@ -738,6 +820,7 @@ class OGVanHerkMapping {
                     }
                 }
 			}
+
 			# Looping through the mapping table with the updated values
 			foreach ($mappingTable as $mappingValue) {
 				// ======== Checking default values ========
@@ -753,7 +836,6 @@ class OGVanHerkMapping {
 					unset($OGTableRecord->{$mappingValue['pixelplus']});
 				}
 			}
-
 
 			# Direct matches
 			foreach ($OGTableRecord as $OGTableRecordKey => $OGTableRecordValue) {
