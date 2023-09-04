@@ -145,7 +145,8 @@ class OGVanHerkPostTypeData {
                         'post_name' => 'straat-huisnummer-huisnummertoevoeging-plaats',     // Mapped value - Default: Straat-Huisnummer-Huisnummertoevoeging-Woonplaats
 						'post_content' => 'aanbiedingstekst',                               // Mapped value - Default: De aanbiedingstekst
 						'datum_gewijzigd' => 'ObjectUpdated',                               // Mapped value - Default: datum_gewijzigd      ; Default value is only for objects without a mapping table within the database
-						'datum_toegevoegd' => 'ObjectDate',                                 // Mapped value - Default: datum_toegevoegd     ; Default value is only for objects without a mapping table within the database
+						'datum_gewijzigd_unmapped' => 'datum_gewijzigd',                    // NON Mapped value - Default: datum_gewijzigd ; The extra field is needed so the plugin can filter on the date for less memory usage
+                        'datum_toegevoegd' => 'ObjectDate',                                 // Mapped value - Default: datum_toegevoegd     ; Default value is only for objects without a mapping table within the database
 						'objectCode' => 'ObjectCode',                                       // Mapped value - Default: object_ObjectCode    ; Default value is only for objects without a mapping table within the database
 
 						# Post fields
@@ -214,9 +215,10 @@ class OGVanHerkPostTypeData {
 						'post_title' => 'straat;huisnummer;huisnummertoevoeging;plaats', // Mapped value
 						'post_name' => 'straat-huisnummer-huisnummertoevoeging-plaats',  // Mapped value
 						'post_content' => 'aanbiedingstekst',       // Mapped value
-						'datum_toegevoegd' => 'ObjectDate',     // Mapped value
-						'datum_gewijzigd' => 'ObjectUpdated',       // Mapped value
-						'objectCode' => 'ObjectCode',               // Mapped value
+						'datum_toegevoegd' => 'ObjectDate',         // Mapped value
+                        'datum_gewijzigd' => 'ObjectUpdated',       // Mapped value
+						'datum_gewijzigd_unmapped' => 'datum_gewijzigd',                    // NON Mapped value - Default: datum_gewijzigd ; The extra field is needed so the plugin can filter on the date for less memory usage
+                        'objectCode' => 'ObjectCode',               // Mapped value
 
 						# Post fields
 						'media' => array(
@@ -286,7 +288,8 @@ class OGVanHerkPostTypeData {
 						'post_content' => 'omschrijving',    // Mapped value
 						'ObjectStatus_database' => 'status',    // Mapped value
 						'datum_gewijzigd' => 'ObjectUpdated',                                       // Mapped value
-						'datum_toegevoegd' => 'ObjectDate',                                         // Mapped value
+						'datum_gewijzigd_unmapped' => 'datum_gewijzigd',                            // NON Mapped value - Default: datum_gewijzigd ; The extra field is needed so the plugin can filter on the date for less memory usage
+                        'datum_toegevoegd' => 'ObjectDate',                                         // Mapped value
 						'objectCode' => 'ObjectCode',                                               // Mapped value
 						'type' => 'project',                                                        // Standard value don't change
 
@@ -327,7 +330,8 @@ class OGVanHerkPostTypeData {
 						'post_content' => 'omschrijving',                                           // Mapped value
 						'ObjectStatus_database' => 'bouwType_BouwTypeDetails_Status_ObjectStatus',  // Mapped value
 						'datum_gewijzigd' => 'ObjectUpdated',                                       // Mapped value
-						'datum_toegevoegd' => 'ObjectDate',                                         // Mapped value
+						'datum_gewijzigd_unmapped' => 'datum_gewijzigd',                    // NON Mapped value - Default: datum_gewijzigd ; The extra field is needed so the plugin can filter on the date for less memory usage
+                        'datum_toegevoegd' => 'ObjectDate',                                         // Mapped value
 						'objectCode' => 'ObjectCode',                                               // Mapped value
 						'type' => 'bouwtype',                                                       // Standard value don't change
 
@@ -368,7 +372,8 @@ class OGVanHerkPostTypeData {
                         'post_content' => 'Aanbiedingstekst',                                                   // Mapped value
 						'ObjectStatus_database' => 'bouwNummer_ObjectCode',                                     // Mapped value
 						'datum_gewijzigd' => 'ObjectUpdated',                                                   // Mapped value
-						'datum_toegevoegd' => 'ObjectDate',                                                     // Mapped value
+						'datum_gewijzigd_unmapped' => 'datum_gewijzigd',                                        // NON Mapped value - Default: datum_gewijzigd ; The extra field is needed so the plugin can filter on the date for less memory usage
+                        'datum_toegevoegd' => 'ObjectDate',                                                     // Mapped value
 						'objectCode' => 'ObjectCode',                                                           // Mapped value
 						'type' => 'bouwnummer',                                                                 // Standard value don't change
 
@@ -487,7 +492,7 @@ class OGVanHerkMapping {
 	private static function cleanupObjects($OGTableRecord): mixed {
 		foreach ($OGTableRecord as $OGTableRecordKey => $OGTableRecordValue) {
 			# Check if the value is empty and if so remove the whole key from the OBJECT
-			if ($OGTableRecordValue == '' or $OGTableRecordValue == NULL or $OGTableRecordValue == 'NULL') {
+			if ($OGTableRecordValue == '' or $OGTableRecordValue == NULL or $OGTableRecordValue == 'NULL' or $OGTableRecordValue == 'null') {
 				unset($OGTableRecord->{$OGTableRecordKey});
 			}
 		}
@@ -1038,6 +1043,24 @@ class OGVanHerkOffers {
 		self::examinePosts();
 	}
 
+    // ================ Declaring Variables =================
+    # Bools
+    private static bool $boolGiveLastCron = True;
+
+    # Ints
+    private static int $intObjectsCreated = 0;
+    private static int $intObjectsUpdated = 0;
+
+    # ==== Getters ====
+    private static function lastCronjob() {
+        // ==== Declaring Variables ====
+        # Classes
+        global $wpdb;
+
+        // ==== Start of Function ====
+        return self::$boolGiveLastCron ? ($wpdb->get_results("SELECT datetime FROM cronjobs ORDER BY datetime DESC LIMIT 1")[0]->datetime ?? 0) : 0;
+    }
+
 	// ================ Functions ================
 	private static function getNames($post_data, $object, $databaseKey) {
         # ======== Post Title ========
@@ -1438,6 +1461,9 @@ self::updatePost($postTypeName, $postID, $OGBouwnummer, $databaseKeys[2], $paren
 
 			# Adding the post ID to the array
 			$objectIDs[] = $OGBouwnummer->{$databaseKeys[2]['ID']};
+
+			# Freeing memory
+			unset($OGBouwnummer);
 		}
 
 		// Returning the objectIDs
@@ -1504,6 +1530,9 @@ self::updatePost($postTypeName, $postID, $OGBouwtype, $databaseKeys[1], $parentP
 			$objectIDs = array_merge($objectIDs, [$OGBouwtype->{$databaseKeys[1]['ID']}]);
 			# Checking the children (bouwnummers)
 			$bouwnummerIds = array_merge($bouwnummerIds, self::checkBouwnummersPosts($postTypeName, $postID, $OGBouwtype, $databaseKeys));
+
+			# Freeing memory
+			unset($OGBouwtype);
 		}
 
 		# Returning the objectIDs
@@ -1517,17 +1546,9 @@ self::updatePost($postTypeName, $postID, $OGBouwtype, $databaseKeys[1], $parentP
 		# Variables
 		$projectIds = [];
 		$locationCodes = self::getLocationCodes();
-		$OGProjects = $wpdb->get_results("SELECT * FROM {$databaseKeys[0]['tableName']}");
-		# Removing every null out of the objects so Wordpress won't get crazy.
-		foreach ($OGProjects as $key => $object) {
-			foreach ($object as $key2 => $value) {
-				if ($value == 'null' or $value == 'NULL' or $value == null) {
-					$OGProjects[$key]->{$key2} = '';
-				}
-			}
-		}
+		$OGProjects = $wpdb->get_results("SELECT * FROM {$databaseKeys[0]['tableName']} WHERE {$databaseKeys[0]['datum_gewijzigd_unmapped']} >= '".self::lastCronjob()."'");
 
-		# ============ Start of Function ============
+        # ============ Start of Function ============
 		# ==== Looping through the objects ====
 		foreach ($OGProjects as $OGProject) {
 			# Checking if this OG project is valid and if not just skip it.
@@ -1562,7 +1583,7 @@ self::updatePost($postTypeName, $postID, $OGBouwtype, $databaseKeys[1], $parentP
 				// Checking if the post is updated
 				if ($dateUpdatedPost != $dateUpdatedObject) {
 					// Updating/overwriting the post
-self::updatePost($postTypeName, $postID, $OGProject, $databaseKeys[0]);
+                    self::updatePost($postTypeName, $postID, $OGProject, $databaseKeys[0]);
 					echo("Updated Nieuwbouw project: {$postID}<br/>");
 				}
 			}
@@ -1576,6 +1597,9 @@ self::updatePost($postTypeName, $postID, $OGProject, $databaseKeys[0]);
 			$projectIds[] = $OGProject->{$databaseKeys[0]['ID']};
 			# Checking the child-posts
 			$arrayIds = self::checkBouwtypesPosts($postTypeName, $postID, $OGProject, $databaseKeys);
+
+            # Freeing memory
+            unset($OGProject);
 		}
 
 		# ==== Deleting the unneeded posts ====
@@ -1618,43 +1642,56 @@ self::updatePost($postTypeName, $postID, $OGProject, $databaseKeys[0]);
 			}
 			# Database dateUpdated
 			$dateUpdatedObject = $OGobject->{$databaseKey['datum_gewijzigd']} ?? $OGobject->{$databaseKey['datum_toegevoegd']};
-			// ======== Start of Function ========
+
+            // ======== Start of Function ========
 			if ($postExists) {
 				// Checking if the post is updated
 				if ($dateUpdatedPost != $dateUpdatedObject) {
-					// Echo the fact that this is happening
-					echo("Updating {$postTypeName} object: {$postData->post->ID}<br/>");
 					// Updating/overwriting the post
-self::updatePost($postTypeName, $postData->post->ID, $OGobject, $databaseKey);
+                    self::updatePost($postTypeName, $postData->post->ID, $OGobject, $databaseKey);
+                    echo("Updated {$postTypeName} object: {$postData->post->ID}<br/>");
+
+                    // Updating the count
+                    self::$intObjectsUpdated++;
 				}
 			}
 			else {
 				// Creating the post
 				$postID = self::createPost($postTypeName, $OGobject, $databaseKey);
 				echo("Created {$postTypeName} object: {$postID}<br/>");
+
+                // Updating the count
+                self::$intObjectsCreated++;
 			}
 
 			# Adding the object ID to the array
 			$objectIDs[] = $OGobject->{$databaseKey['ID']};
+
+            # Freeing memory
+            unset($OGobject);
 		}
 
 		# Deleting the posts that are not in the array
-//self::deleteUnneededPosts($postTypeName, $databaseKey, $objectIDs);
+        // self::deleteUnneededPosts($postTypeName, $databaseKey, $objectIDs);
 	}
 
 	public static function examinePosts(): void {
 		// ============ Declaring Variables ============
-		# Classes
+		# ==== Classes ====
 		global $wpdb;
 
-		# Variables
+		# ==== Vars ====
+        # Time
         date_default_timezone_set('Europe/Amsterdam');
 		$beginTime = time();
+
+        # Database
 		$postTypeData = OGVanHerkPostTypeData::customPostTypes();
+
 		// ============ Start of Function ============
         # ==== Checking all the post types ====
 		foreach ($postTypeData as $postTypeName => $postTypeArray) {
-//			if ($postTypeName == 'wonen' or $postTypeName == 'bedrijven') {continue;}
+			// if ($postTypeName == 'wonen' or $postTypeName == 'bedrijven') {continue;}
 
 			// ======== Declaring Variables ========
 			$boolIsNieuwbouw = !isset($postTypeArray['database_tables']['object']);
@@ -1676,20 +1713,9 @@ self::updatePost($postTypeName, $postData->post->ID, $OGobject, $databaseKey);
 				self::checkNieuwbouwPosts($postTypeName, $databaseKeys);
 			}
 			else {
-				$last_cronjob = $wpdb->get_results("SELECT datetime FROM cronjobs ORDER BY datetime LIMIT 1")[0]->datetime ?? 0;
 				foreach ($databaseKeys as $databaseKey) {
-					$OGobjects = $wpdb->get_results("SELECT * FROM {$databaseKey['tableName']} WHERE datum_gewijzigd >= {$last_cronjob}");
-
-					# Removing every null out of the objects so Wordpress won't get crazy.
-					foreach ($OGobjects as $key => $object) {
-						foreach ($object as $key2 => $value) {
-							if ($value == 'null' or $value == 'NULL' or $value == null) {
-								$OGobjects[$key]->{$key2} = '';
-							}
-						}
-					}
-
-					if (!empty($OGobjects)) {
+					$OGobjects = $wpdb->get_results("SELECT * FROM {$databaseKey['tableName']} WHERE {$postTypeArray['database_tables']['object']['datum_gewijzigd_unmapped']} >= '".self::lastCronjob()."'");
+                    if (!empty($OGobjects)) {
 						self::checkNormalPosts($postTypeName, $OGobjects, $databaseKey);
 					}
 				}
@@ -1704,6 +1730,9 @@ self::updatePost($postTypeName, $postData->post->ID, $OGobject, $databaseKey);
 			# convert to megabytes
 			'memoryUsageMax' => $maxMemoryUsage,
 			'memoryUsage' => $memoryUsage,
+            'boolGiveLastCron' => self::$boolGiveLastCron,
+            'objectsCreated' => self::$intObjectsCreated,
+            'objectsUpdated' => self::$intObjectsUpdated,
 			'datetime' => date('Y-m-d H:i:s', $beginTime),
 			'duration' => round((time() - $beginTime) / 60, 2)
 		]);
