@@ -1,8 +1,8 @@
 <?php
-// ================== Imports ==================
+// ========= Imports =========
 include_once("functions.php");
 
-// ==== Activation and Deactivation (Uninstallation is in the functions.php because it needs to be a static function) ====
+// ========= Activation, Deactivation and Uninstall =========
 class OGVanHerkActivationAndDeactivation {
 	// ======== Activation ========
 	public static function activate(): void {
@@ -38,7 +38,7 @@ class OGVanHerkActivationAndDeactivation {
 	static function registerSettings(): void {
 		// ==== Start of Function ====
 		// Registering settings
-		foreach (OGVanHerkSettingsData::settings() as $settingName => $settingValue) {
+		foreach (OGVanHerkSettingsData::arrOptions() as $settingName => $settingValue) {
 			add_option( OGVanHerkSettingsData::$settingPrefix . $settingName, $settingValue);
 		}
 	}
@@ -66,7 +66,7 @@ class OGVanHerkActivationAndDeactivation {
 	}
 }
 
-// ==== Data Classes ====
+// ========= Data Classes =========
 class OGVanHerkPostTypeData {
 	// ============ Begin of Class ============
 	public static function customPostTypes(): array {
@@ -410,24 +410,24 @@ class OGVanHerkPostTypeData {
 }
 class OGVanHerkSettingsData {
 	// ======== Declare Variables ========
-	// ==== Strings ====
+	# Strings
 	public static string $settingPrefix = 'ppOG_'; // This is the prefix for all the settings used within the OG Plugin.
 	public static string $cacheFolder = 'caches/'; // This is the folder where all the cache files are stored within the server/ftp
 
-    // ==== Arrays ====
-	public static array $apiURLs = [
+    # Arrays
+	private static array $apiURLs = [
 		'license' => 'https://og-feeds2.pixelplus.nl/api/validate.php',
 		'syncTimes' => 'https://og-feeds2.pixelplus.nl/api/latest.php'
 	];
-	public static array $cacheFiles = [
+	private static array $cacheFiles = [
 		'licenseCache' => 'licenseCache.json', // This is the cache file for the checking the Licence key
 	];
-	public static array $settings = [
-		/* Setting Name */'licenseKey' => /* Default Value */       '',     // License Key
+	private static array $arrOptions = [
+		/* Setting Name */'licenseKey' => /* Default Value */   '',     // License Key
 	];
-	public static array $adminSettings = [
+	private static array $adminSettings = [
 		// Settings 1
-		/* Option Group= */ 'ppOG_AdminOptions' => [
+		/* Option Group= */ 'ppOG_adminOptions' => [
 			// General information
 			'settingPageSlug' => 'pixelplus-og-plugin-settings',
 			// Sections
@@ -449,6 +449,13 @@ class OGVanHerkSettingsData {
 		]
 	];
 
+	# Bools
+	public static bool $boolGiveLastCron = True;
+
+	# Ints
+	public static int $intObjectsCreated = 0;
+	public static int $intObjectsUpdated = 0;
+
     // ==== Getters ====
     public static function apiURLs(): array {
         return self::$apiURLs;
@@ -456,8 +463,8 @@ class OGVanHerkSettingsData {
     public static function cacheFiles(): array {
         return self::$cacheFiles;
     }
-    public static function settings(): array {
-        return self::$settings;
+    public static function arrOptions(): array {
+        return self::$arrOptions;
     }
     public static function adminSettings(): array {
         return self::$adminSettings;
@@ -625,47 +632,33 @@ class OGVanHerkMapping {
 					// ==== Start of Function ====
 					# Looping through the plus keys
 					foreach($arrExplodedKey as $arrExplodedKeyValue) {
-                        // ==== Declaring Variables ====
-                        # Bools
+						// ==== Declaring Variables ====
+						# Bools
 						$boolTrimSpaces = False;
 
-                        // ==== Start of Function ====
-                        # Step 1: Checking if there are any special character at the beginning and or end of the key
-                        if (str_starts_with($arrExplodedKeyValue, '~') and str_ends_with($arrExplodedKeyValue, '~')) {
-                            # Step 2: Remove the ~ from the value and all the spaces. And then adding it to strResult
-                            $boolTrimSpaces = True;
+						// ==== Start of Function ====
+						# Step 1: Checking if there are any special character at the beginning and or end of the key
+						if (str_starts_with($arrExplodedKeyValue, '~') and str_ends_with($arrExplodedKeyValue, '~')) {
+							# Step 2: Remove the ~ from the value and all the spaces. And then adding it to strResult
+							$boolTrimSpaces = True;
 
-                            # Step 3: Removing the ~ from the value
-                            $arrExplodedKeyValue = trim($arrExplodedKeyValue, '~');
-                        }
+							# Step 3: Removing the ~ from the value
+							$arrExplodedKeyValue = trim($arrExplodedKeyValue, '~');
+						}
 
 						# Step 4: Check if the key even isset or empty in OG Record
 						if (isset($OGTableRecord->{$arrExplodedKeyValue}) and !empty($OGTableRecord->{$arrExplodedKeyValue})) {
 							# Step 5: Adding it to strResult
 							$strResult .= $boolTrimSpaces ? str_replace(' ', '', $OGTableRecord->{$arrExplodedKeyValue}).' ' : $OGTableRecord->{$arrExplodedKeyValue}.' ';
-                        }
+						}
 					}
-                    # Looping through the minus keys
+					# Looping through the minus keys
 					foreach($arrExplodedKeyMinus as $arrExplodedKeyValue) {
-                        // ==== Declaring Variables ====
-						# Bools
-						$boolTrimSpaces = False;
-
-                        // ==== Start of Function ====
-                        # Step 1: Checking if there are any special character at the beginning and or end of the key
-                        if (str_starts_with($arrExplodedKeyValue, '~') and str_ends_with($arrExplodedKeyValue, '~')) {
-                            # Step 2: Remove the ~ from the value and all the spaces. And then adding it to strResult
-                            $boolTrimSpaces = True;
-
-                            # Step 3: Removing the ~ from the value
-                            $arrExplodedKeyValue = trim($arrExplodedKeyValue, '~');
-                        }
-
-						# Step 4: Check if the key even isset or empty in OG Record
+						# Step 2: Check if the key even isset or empty in OG Record
 						if (isset($OGTableRecord->{$arrExplodedKeyValue}) and !empty($OGTableRecord->{$arrExplodedKeyValue})) {
-                            # Step 5: Adding it to strResult
-                            $strResult .= $boolTrimSpaces ? str_replace(' ', '', $OGTableRecord->{$arrExplodedKeyValue}).'-' : $OGTableRecord->{$arrExplodedKeyValue}.'-';
-                        }
+							# Step 3: Add the value to the result string
+							$strResult .= $OGTableRecord->{$arrExplodedKeyValue}.'-';
+						}
 					}
 
 					# Putting it in the mapping table as a default value
@@ -789,14 +782,14 @@ class OGVanHerkMapping {
                         // ==== Start of Function ====
                         if ($strTrimmedKey == 'bouwtypes') {
                             # Step 1: Getting the count of bouwtypes in the database
-                            $count = $wpdb->get_var("SELECT COUNT(*) FROM {$databaseKeys[1]['tableName']} WHERE {$databaseKeys[0]['media']['search_id']} = {$projectID}");
+                            $count = $wpdb->get_var("SELECT COUNT(*) FROM {$databaseKeys[1]['tableName']} WHERE {$databaseKeys[0]['media']['search_id']} = $projectID");
 
                             # Step 2: Adding the count to the OG Record
                             $OGTableRecord->{$mappingTable[$mappingKey]['vanherk']} = $count;
                         }
                         if ($strTrimmedKey == 'bouwnummers') {
                             # Step 1: Getting the count of bouwnummers in the database
-                            $count = $wpdb->get_var("SELECT COUNT(*) FROM {$databaseKeys[2]['tableName']} WHERE {$databaseKeys[0]['media']['search_id']} = {$projectID}");
+                            $count = $wpdb->get_var("SELECT COUNT(*) FROM {$databaseKeys[2]['tableName']} WHERE {$databaseKeys[0]['media']['search_id']} = $projectID");
 
                             # Step 2: Adding the count to the OG Record
                             $OGTableRecord->{$mappingTable[$mappingKey]['vanherk']} = $count;
@@ -869,7 +862,7 @@ class OGVanHerkMapping {
 	}
 }
 
-// ============ Start of Classes ============
+// ========= Start of Classes =========
 class OGVanHerkMenus {
 	// ============ Constructor ============
 	function __construct() {
@@ -915,82 +908,10 @@ class OGVanHerkMenus {
 	}
 
 	# ==== HTML ====
-	public static function htmlMenu(): void {
-		// ========== Declaring Variables ==========
-		# Classes
-		$ogTableMapping = new OGVanHerkTableMappingDisplay();
-		$OGPostData = OGVanHerkPostTypeData::customPostTypes();
-		# Vars
-		$postWonen_columns = $ogTableMapping->getPostColumns('wonen');
-		$tableWonen_columns = $ogTableMapping->getTableColumns($OGPostData['wonen']['database_tables']['object']['tableName']);
-
-		// ========== Start of Function ==========
-		htmlHeader('Pixelplus OG Plugin');
-		echo("
-            <div class='container'>
-                <div class='row'>
-                    <div class='col'>");
-		if (!empty($postWonen_columns)) {
-			foreach ($postWonen_columns as $key => $value) {
-				echo("<p>".$key."</p>");
-			}
-		}
-		echo("              </div>
-                    <div class='col'>");
-		if (!empty($tableWonen_columns)) {
-			foreach ($tableWonen_columns as $value) {
-				echo("<p>".$value->Field."</p>");
-			}
-		}
-		echo("              </div>
-                </div>
-            </div>
-        ");
-		htmlFooter('Pixelplus OG Plugin');
-	}
 	// OG Aanbod
 	public static function HTMLOGAanbodDashboard(): void { htmlHeader('OG Aanbod Dashboard'); ?>
         <p>dingdong bishass</p>
 		<?php htmlFooter('OG Aanbod Dashboard');}
-}
-class OGVanHerkTableMappingDisplay {
-	// ============ Constructor ============
-	function __construct() {
-		// ========== Start of Function ==========
-
-	}
-
-	// ================ Begin of Class ================
-	# This function is for extracting all the columns of the wp_posts table to eventually create a mapping system.
-	function getPostColumns($postType) {
-		// ======== Declaring Variables ========
-		# Vars
-		$columns = array();
-		$posts = new WP_Query(array(
-			'post_type' => $postType,
-			'post_status' => 'any',
-			'posts_per_page' => 1
-		));
-
-		// ======== Start of Function ========
-		// ======== Wonen ========
-		# Getting all the columns of the first item's metatable
-		if ($posts->have_posts()) {
-			$columns = get_post_meta($posts->post->ID);
-		}
-
-		return $columns;
-	}
-	function getTableColumns($tableName): array|object|null {
-		// ======== Declaring Variables ========
-		# Classes
-		global $wpdb;
-
-		# Vars
-
-		// ======== Start of Function ========
-		return $wpdb->get_results( "SHOW COLUMNS FROM " . $tableName);
-	}
 }
 class OGVanHerkPostTypes {
 	// ==== Start of Class ====
@@ -1037,7 +958,7 @@ class OGVanHerkPostTypes {
 class OGVanHerkOffers {
     // ============ Constructor ============
     public function __construct() {
-	    # Use this one if it is going to be run on the site itself.
+	    # Use this one if it is going to be run on the site itself. SMALl NOTE: There will be no input to the cronjobs table
 	    // add_action('admin_init', [__CLASS__, 'examinePosts']);
 
 	    # Use this one if it is going to be a cronjob.
@@ -1045,14 +966,7 @@ class OGVanHerkOffers {
     }
 
     // ============ Declaring Variables ============
-	# Bools
-	private static bool $boolGiveLastCron = True;
-
-	# Ints
-	private static int $intObjectsCreated = 0;
-	private static int $intObjectsUpdated = 0;
-
-	# ==== Getters ====
+    # ==== Getters ====
 	private static function lastCronjob() {
 		// ==== Declaring Variables ====
 		# Classes
@@ -1062,21 +976,22 @@ class OGVanHerkOffers {
 		# Checking if the cronjob table exists
 		$cronjobTableExists = $wpdb->get_results("SHOW TABLES LIKE 'cronjobs'");
 		if (empty($cronjobTableExists)) {
-			$wpdb->query("
-                CREATE TABLE `cronjobs` (
-              `cronjob_count` int(5) NOT NULL AUTO_INCREMENT,
-              `name` varchar(60) DEFAULT NULL,
-              `boolGiveLastCron` tinyint(1) DEFAULT NULL,
-              `MemoryUsageMax` float NOT NULL,
-              `memoryUsage` float NOT NULL,
-              `datetime` datetime NOT NULL,
-              `objectsCreated` int(5) DEFAULT NULL,
-              `objectsUpdated` int(5) DEFAULT NULL,
-              `duration` float NOT NULL,
-              PRIMARY KEY (`cronjob_count`)) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci ROW_FORMAT=COMPRESSED");
+            $wpdb->query("CREATE TABLE `cronjobs` (
+                `cronjob_count` int(5) NOT NULL AUTO_INCREMENT,
+                `name` varchar(60) DEFAULT NULL,
+                `boolGiveLastCron` tinyint(1) DEFAULT NULL,
+                `MemoryUsageMax` float NOT NULL,
+                `memoryUsage` float NOT NULL,
+                `datetime` datetime NOT NULL,
+                `objectsCreated` int(5) DEFAULT NULL,
+                `objectsUpdated` int(5) DEFAULT NULL,
+                `duration` float NOT NULL,
+                `boolDone` tinyint(1) DEFAULT NULL,
+                PRIMARY KEY (`cronjob_count`)) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci ROW_FORMAT=COMPRESSED
+            ");
 		}
 
-		return self::$boolGiveLastCron ? ($wpdb->get_results("SELECT datetime FROM cronjobs ORDER BY datetime DESC LIMIT 1")[0]->datetime ?? 0) : 0;
+		return OGVanHerkSettingsData::$boolGiveLastCron ? ($wpdb->get_results("SELECT datetime FROM cronjobs ORDER BY datetime DESC LIMIT 1")[0]->datetime ?? 0) : 0;
 	}
     public static function boolFirstInit(): bool {
         // ==== Start of Function ====
@@ -1598,7 +1513,7 @@ class OGVanHerkOffers {
                 echo("Created Nieuwbouw project: {$postID}<br/>");
 
                 # Updating the count
-                self::$intObjectsCreated++;
+	            OGVanHerkSettingsData::$intObjectsCreated++;
 
                 # Adding the postID to the array
                 $projectIds[] = $OGProject->{$databaseKeys[0]['ID']};
@@ -1634,7 +1549,7 @@ class OGVanHerkOffers {
                     echo("Created Nieuwbouw project: {$postID}<br/>");
 
                     # Updating the count
-                    self::$intObjectsCreated++;
+	                OGVanHerkSettingsData::$intObjectsCreated++;
                 }
                 else {
                     // == Declaring Variables ==
@@ -1649,7 +1564,7 @@ class OGVanHerkOffers {
                         echo("Updated Nieuwbouw project: {$projectPosts->posts[$postKey]->ID}<br/>");
 
                         # Updating the count
-                        self::$intObjectsUpdated++;
+	                    OGVanHerkSettingsData::$intObjectsUpdated++;
                     }
                 }
 
@@ -1683,7 +1598,7 @@ class OGVanHerkOffers {
 		        echo("Created {$postTypeName} object: {$postID}<br/>");
 
 		        # Updating the count
-		        self::$intObjectsCreated++;
+		        OGVanHerkSettingsData::$intObjectsCreated++;
 
 		        # Adding the object ID to the array
 		        $objectIDs[] = $OGobject->{$databaseKey['ID']};
@@ -1711,7 +1626,7 @@ class OGVanHerkOffers {
                     echo("Created {$postTypeName} object: {$postID}<br/>");
 
                     # Updating the count
-                    self::$intObjectsCreated++;
+	                OGVanHerkSettingsData::$intObjectsCreated++;
                 }
                 else {
                     // == Declaring Variables ==
@@ -1725,7 +1640,7 @@ class OGVanHerkOffers {
                         echo("Updated {$postTypeName} object: {$postData->posts[$postKey]->ID}<br/>");
 
                         # Updating the count
-                        self::$intObjectsUpdated++;
+	                    OGVanHerkSettingsData::$intObjectsUpdated++;
                     }
                 }
 
@@ -1740,10 +1655,6 @@ class OGVanHerkOffers {
 		// ============ Declaring Variables ============
 		# Classes
 		global $wpdb;
-
-		# Variables
-		date_default_timezone_set('Europe/Amsterdam');
-		$beginTime = time();
 
 		// ============ Start of Function ============
 		# ==== Checking all the post types ====
@@ -1788,21 +1699,5 @@ class OGVanHerkOffers {
 				}
 			}
 		}
-
-		// Putting in the database how much memory it ended up gusing maximum from bytes to megabytes
-		$maxMemoryUsage = (memory_get_peak_usage(true) / 1024 / 1024);
-		$memoryUsage = (memory_get_usage(true) / 1024 / 1024);
-		$wpdb->insert('cronjobs', [
-			'name' => 'OGOffers',
-			# convert to megabytes
-			'memoryUsageMax' => $maxMemoryUsage,
-			'memoryUsage' => $memoryUsage,
-			'boolGiveLastCron' => self::$boolGiveLastCron,
-			'objectsCreated' => self::$intObjectsCreated,
-			'objectsUpdated' => self::$intObjectsUpdated,
-			'datetime' => date('Y-m-d H:i:s', $beginTime),
-			'duration' => round((time() - $beginTime) / 60, 2)
-		]);
 	}
 }
-?>

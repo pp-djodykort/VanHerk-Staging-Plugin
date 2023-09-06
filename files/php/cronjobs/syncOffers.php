@@ -1,10 +1,10 @@
 <?php
-// ============ Access allowed & Lock file ============
-// ======== Declaring Variables ========
-# Plus this variable: '/lockfiles/syncOffers.lock' do it the right way so it can be used on every os
+// ============ Declaring Variables ============
+# Lockfile
+$boolLockFileSystemEnabled = True;
 $lockFile = __DIR__. DIRECTORY_SEPARATOR. 'lockfiles'. DIRECTORY_SEPARATOR. 'syncOffers.lock';
-# Variables
-$boolLockFileSystemEnabled = False;
+
+# Access
 $accessToken = ['accessToken', '5375636B4D79416363657373546F6B656E'];
 $overrideToken = ['overrideToken', '5375636B4D794C6F636B46696C65546F6B656E'];
 
@@ -18,11 +18,11 @@ else {
 	$overrideActivated = isset($_GET[$overrideToken[0]]) && (($_GET[$overrideToken[0]] == $overrideToken[1] ?? false));
 }
 
-// ======== Start Program ========
-if (!$accessAllowed) {
-	die("Access not allowed.");
-}
+// ============ Security ============
+# Checking the Access Allowed
+if (!$accessAllowed) die("Access not allowed.");
 
+# Checking the LockFile System
 if ($boolLockFileSystemEnabled) {
 	# Check if this cronjob currently is activated
 	if (file_exists($lockFile)) {
@@ -36,34 +36,64 @@ if ($boolLockFileSystemEnabled) {
 		if (!file_exists(dirname($lockFile))) {
 			mkdir(dirname($lockFile), 0777, true);
 		}
+
+		# Touching the file, so it can be used as a lock file
+		touch($lockFile);
 	}
-
-	# Touching the file, so it can be used as a lock file
-	touch($lockFile);
-
-	# Registering a shutdown function, so the lock file can be removed after the program has finished
-	register_shutdown_function(function () use ($lockFile) {
-		unlink($lockFile);
-	});
 }
+
+// ============ Declaring Variables ============
+session_start();
+# Bools
+$_SESSION['boolDone'] = False;
+
+# Ints
+$beginTime = time();
+
+# Limits
+ini_set( 'max_execution_time', '0');
+ini_set( 'memory_limit', '-1' );
 
 // ============ Imports ============
 # WordPress
-if ($wpLoad = dirname(__DIR__, 6) . '/wp/wp-load.php' and file_exists( $wpLoad ) ) {require_once( $wpLoad );}
-elseif ($wpLoad = dirname(__DIR__, 6) . '/wp-load.php' and file_exists( $wpLoad ) ) {require_once( $wpLoad );}
+if ($wpLoad = dirname(__DIR__, 6) . DIRECTORY_SEPARATOR . 'wp' . DIRECTORY_SEPARATOR . 'wp-load.php' and file_exists( $wpLoad ) ) {require_once( $wpLoad );}
+elseif ($wpLoad = dirname(__DIR__, 6) . DIRECTORY_SEPARATOR .'wp-load.php' and file_exists( $wpLoad ) ) {require_once( $wpLoad );}
 
 # Classes / Functions
-require_once(dirname(__DIR__) . '/includes/classes.php');
-require_once(dirname(__DIR__) . '/includes/functions.php');
+require_once(dirname(__DIR__).DIRECTORY_SEPARATOR.'includes'.DIRECTORY_SEPARATOR.'classes.php');
+require_once(dirname(__DIR__).DIRECTORY_SEPARATOR.'includes'.DIRECTORY_SEPARATOR.'functions.php');
 
-// ============ Declaring Variables ============
-# Limits
-// Changing the execution time and memory limit
-ini_set('max_execution_time', '0');
-ini_set('memory_limit', '-1');
+# Registering a shutdown function, so the lock file can be removed after the program has finished
+register_shutdown_function(function () use ($lockFile, $beginTime) {
+	// ======== Declaring Variables ========
+	# Classes
+	global $wpdb;
 
-# Globals
-global $wpdb;
+	# Date / Time
+	date_default_timezone_set('Europe/Amsterdam');
+
+	// ======== Start of Function ========
+	# Untouching the file, so it can be used as a lock file
+	unlink($lockFile);
+
+	# Putting in the database how much memory it ended up using maximum from bytes to megabytes
+	$maxMemoryUsage = (memory_get_peak_usage(true) / 1024 / 1024);
+	$memoryUsage = (memory_get_usage(true) / 1024 / 1024);
+	$wpdb->insert('cronjobs', [
+		'name' => 'OGOffers',
+		# convert to megabytes
+		'memoryUsageMax' => $maxMemoryUsage,
+		'memoryUsage' => $memoryUsage,
+		'boolGiveLastCron' => OGVanHerkSettingsData::$boolGiveLastCron,
+		'objectsCreated' => OGVanHerkSettingsData::$intObjectsCreated,
+		'objectsUpdated' => OGVanHerkSettingsData::$intObjectsUpdated,
+		'datetime' => date('Y-m-d H:i:s', $beginTime),
+		'duration' => round((time() - $beginTime) / 60, 2),
+		'boolDone' => $_SESSION['boolDone']
+	]);
+});
 
 // ============ Start of Program ============
-$ogOffers = new OGVanHerkOffers();
+$OGSyncOffers = new OGVanHerkOffers();
+$_SESSION['boolDone'] = True;
+exit();
