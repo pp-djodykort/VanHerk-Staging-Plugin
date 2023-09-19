@@ -1,7 +1,7 @@
 <?php
 // ============ Declaring Variables ============
 # Lockfile
-$boolLockFileSystemEnabled = True;
+$boolLockFileSystemEnabled = False;
 $lockFile = __DIR__. DIRECTORY_SEPARATOR. 'lockfiles'. DIRECTORY_SEPARATOR. 'syncOffers.lock';
 
 # Access

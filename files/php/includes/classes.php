@@ -898,15 +898,15 @@ class OGVanHerkMenus {
 			'dashicons-admin-multisite',
 			40);
 
-		 add_submenu_page(
-			'pixelplus-og-plugin-aanbod',
-			'Aanbod Dashboard',
-			'Dashboard',
-			'manage_options',
-			'pixelplus-og-plugin-aanbod',
-			[__CLASS__, 'HTMLOGAanbodDashboard'],
-			0
-		 );
+		// add_submenu_page(
+		//	'pixelplus-og-plugin-aanbod',
+		//	'Aanbod Dashboard',
+		//	'Dashboard',
+		//	'manage_options',
+		//	'pixelplus-og-plugin-aanbod',
+		//	[__CLASS__, 'HTMLOGAanbodDashboard'],
+		//	0
+		// );
 	}
 
 	# ==== HTML ====
