@@ -1264,6 +1264,11 @@ class OGVanHerkOffers {
 			# Vars
 			$mediaTiaraID = $mediaObject->{$mediaTiaraIDName};
 			$boolIsConnectedPartner = $mediaObject->{$databaseKeysMedia['media_Groep']} == 'Connected_partner';
+
+			// Handle VIDEO (only in case it's served over zien24.nl)
+			if (strtolower($mediaObject->{$databaseKeysMedia['media_Groep']}) == 'video' && strpos($mediaObject->media_URL, 'zien24') !== false)
+				$boolIsConnectedPartner = true;
+
 			$post_mime_type = $mime_type_map[$mediaObject->{'bestands_extensie'}] ?? $mime_type_map2[$mediaObject->{$databaseKeysMedia['media_Groep']}] ?? 'unknown';
 			$media_url = "og_media/{$postTypeName}_{$OGobject->{$databaseKeysMedia['object_keys']['objectVestiging']}}_{$OGobject->{$databaseKeysMedia['object_keys']['objectTiara']}}/{$OGobject->{$databaseKeysMedia['object_keys']['objectTiara']}}_{$mediaTiaraID}.$mediaObject->bestands_extensie";
 			$post_data = [
