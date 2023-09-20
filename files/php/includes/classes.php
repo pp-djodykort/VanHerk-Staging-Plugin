@@ -912,7 +912,7 @@ class OGVanHerkMenus {
 	# ==== HTML ====
 	// OG Aanbod
 	public static function HTMLOGAanbodDashboard(): void { htmlHeader('OG Aanbod Dashboard'); ?>
-        <p>dingdong bishass</p>
+        <p>Under construction.</p>
 		<?php htmlFooter('OG Aanbod Dashboard');}
 }
 class OGVanHerkPostTypes {
