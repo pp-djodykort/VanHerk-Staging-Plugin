@@ -991,7 +991,7 @@ class OGVanHerkOffers {
                 `boolDone` tinyint(1) DEFAULT NULL,
                 PRIMARY KEY (`cronjobID`)) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci ROW_FORMAT=COMPRESSED ");
 		}
-		return OGVanHerkSettingsData::$boolGiveLastCron ? ($wpdb->get_results("SELECT datetime FROM `".OGVanHerkSettingsData::$cronjobTableName."` ORDER BY cronjobID DESC LIMIT 1")[0]->datetime ?? 0) : 0;
+		return OGVanHerkSettingsData::$boolGiveLastCron ? ($wpdb->get_results("SELECT datetime FROM `".OGVanHerkSettingsData::$cronjobTableName."` ORDER BY cronjobID DESC LIMIT 2,1")[0]->datetime ?? 0) : 0;
 	}
 	public static function boolFirstInit(): bool {
 		// ==== Declaring Variables ====
