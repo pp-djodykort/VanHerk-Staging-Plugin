@@ -502,11 +502,9 @@ class OGVanHerkMapping {
 		foreach ($OGTableRecord as $OGTableRecordKey => $OGTableRecordValue) {
 			# Check if the value is empty and if so remove the whole key from the OBJECT
 			if ($OGTableRecordValue == '' or $OGTableRecordValue == NULL or $OGTableRecordValue == 'NULL' or $OGTableRecordValue == 'null') {
-				//unset($OGTableRecord->{$OGTableRecordKey});
-
 				// Always reset the value to some value rather than removing it from the associative array altogether
-				// The previous solution was causing a bug where removed values (e.g. open house dates) would not be updated
-				$OGTableRecord->{$OGTableRecordKey} = ''; 
+				// The previous solution was causing a bug where removed values would not be removed from the DB (e.g. open house dates)
+				$OGTableRecord->{$OGTableRecordKey} = NULL;
 			}
 		}
 
