@@ -1382,7 +1382,7 @@ class OGVanHerkOffers {
 			$OGBouwnummer = OGVanHerkMapping::mapMetaData($OGBouwnummer, ($databaseKeys[2]['mapping'] ?? []), self::getLocationCodes(), $databaseKeys);
 
 			# Adding the 'type' meta data
-			$OGBouwnummer->type = $databaseKeys[1]['type'];
+			$OGBouwnummer->type = $databaseKeys[2]['type'];
 
 			# Post - Bouwnummer
 			$postData = new WP_Query([
