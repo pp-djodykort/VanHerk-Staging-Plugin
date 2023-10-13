@@ -1131,7 +1131,7 @@ class OGVanHerkOffers {
 			'post_title' => '',
 			'post_name' => '',
 			'post_content' => '',
-			'post_status' => 'publish',
+			'post_status' => 'draft',
 		];
 		$post_data = self::getNames($post_data, $OGobject, $databaseKey);
 
