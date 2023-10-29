@@ -213,8 +213,17 @@ class OGVanHerkPostTypeData {
 						'objectCode' => 'ObjectCode',                                       // Mapped value - Default: object_ObjectCode    ; Default value is only for objects without a mapping table within the database
 						'ObjectStatus_database' => 'ObjectStatus',
 						'publicatiedatum' => 'publishdate',
-						'koopprijs' => 'ObjectKoop',
-						'huurprijs' => 'ObjectHuur',
+						/*
+						Warning: You can only use one of the separators at the same time.
+							koop-/huurprijs Separators:
+						     (Nothing)      - If there is no separator, it will just use the first value. The only variable given in
+							| (Pipe)        - It makes use of the vanherk ObjectHuur and ObjectKoop methods to check if an object is one of those.
+											  Example: ObjectHuur = 0, ObjectKoop = 1, then it will only show the ObjectKoop value.
+
+											  Use like this: ObjectKoop|Prijs
+						*/
+						'koopprijs' => 'ObjectKoop|Prijs',
+						'huurprijs' => 'ObjectHuur|Prijs',
 						'pixelplus_status' => OGVanHerkSettingsData::$settingPrefix.'ObjectStatus',
 
 						# Post fields
@@ -1589,9 +1598,29 @@ class OGVanHerkPostTypes {
 					}
 					# Check if koopprijs or huurprijs
                     elseif (strtolower($column) == 'koopprijs' or strtolower($column) == 'huurprijs') {
-						# Echo it like the user has set it in WordPress
-						if (empty($columnValue)) echo('N.v.t.');
-						else echo('€ '.number_format($columnValue, 0, ',', '.'));
+						# Check if the vanherk method has been used
+                        if (str_contains($postTypeArrayExists, '|')) {
+                            # Explode the string
+                            $explodedString = explode('|', $postTypeArrayExists);
+
+                            # Check if true or false
+                            if (get_post_meta($post_id, $explodedString[0], true)) {
+                                # Get the second value
+                                $strPrice = get_post_meta($post_id, $explodedString[1], true);
+
+                                # Echo the price
+	                            echo('€ '.number_format($strPrice ?? 0, 0, ',', '.'));
+                            }
+                            else {
+                                # Echo that it is not available
+                                echo('N.v.t.');
+                            }
+                        }
+                        else {
+	                        # Echo it like the user has set it in WordPress
+	                        if (empty($columnValue)) echo('N.v.t.');
+	                        else echo('€ '.number_format($columnValue ?? 0, 0, ',', '.'));
+                        }
 					}
 					else {
 						echo($columnValue);
