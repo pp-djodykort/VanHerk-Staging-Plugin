@@ -1673,7 +1673,8 @@ class OGVanHerkPostTypes {
 				if ($query->get('orderby') != '') {
 					# Getting the meta key
 					$meta_key = OGVanHerkPostTypeData::customPostTypes()[$typenow]['database_tables'][OGVanHerkSettingsData::$projectenArrayName][$query->get('orderby')] ?? false;
-					if ($meta_key) {
+
+                                        if ($meta_key) {
 						$meta_query[] = [
 							'key' => $meta_key,
 						];
@@ -1692,7 +1693,20 @@ class OGVanHerkPostTypes {
 				if ($query->get('orderby') != '') {
 					# Getting the meta key
 					$meta_key = OGVanHerkPostTypeData::customPostTypes()[$typenow]['database_tables']['object'][$query->get('orderby')] ?? false;
-					if ($meta_key) {
+
+					# Check if meta_key contains a | (vanherk method)
+					if (str_contains($meta_key, '|')) {
+						# Explode the string
+						$explodedString = explode('|', $meta_key);
+
+						# Check if true or false
+						if ($explodedString) {
+                            # Get the second value
+                            $meta_key = $explodedString[1];
+                        }
+					}
+
+                    if ($meta_key) {
 						$meta_query[] = [
 							'key' => $meta_key,
 						];
