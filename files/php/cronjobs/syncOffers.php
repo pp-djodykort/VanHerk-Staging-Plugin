@@ -64,7 +64,7 @@ require_once(dirname(__DIR__).DIRECTORY_SEPARATOR.'includes'.DIRECTORY_SEPARATOR
 require_once(dirname(__DIR__).DIRECTORY_SEPARATOR.'includes'.DIRECTORY_SEPARATOR.'functions.php');
 
 # Registering a shutdown function, so the lock file can be removed after the program has finished
-register_shutdown_function(function () use ($lockFile, $beginTime) {
+register_shutdown_function(function () use ($boolLockFileSystemEnabled, $lockFile, $beginTime) {
 	// ======== Declaring Variables ========
 	# Classes
 	global $wpdb;
@@ -74,7 +74,11 @@ register_shutdown_function(function () use ($lockFile, $beginTime) {
 
 	// ======== Start of Function ========
 	# Untouching the file, so it can be used as a lock file
-	unlink($lockFile);
+	if ($boolLockFileSystemEnabled) {
+		if (file_exists($lockFile)) {
+			unlink($lockFile);
+		}
+	}
 
 	# Putting in the database how much memory it ended up using maximum from bytes to megabytes
 	$maxMemoryUsage = (memory_get_peak_usage(true) / 1024 / 1024);
